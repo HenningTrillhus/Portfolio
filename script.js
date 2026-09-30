@@ -3,6 +3,9 @@
 
   /* ---------- Settings you can edit ---------- */
   const GITHUB_USER = "HenningTrillhus";
+  // Public access key from web3forms.com (free; the key is meant to be public and only lets people email you).
+  // While it is empty the contact form stays hidden.
+  const WEB3FORMS_ACCESS_KEY = "";
   // Repos to leave out of the list (by name).
   const HIDDEN_REPOS = ["Portfolio"];
   // How each project was made. Repos in neither list end up under "More projects".
@@ -127,6 +130,15 @@
       hsWhen: "High school",
       hsTitle: "Vika videregående skole",
       hsDetail: "Science track (realfag) with IT2, R2 and Physics 2.",
+      formName: "Name",
+      formEmail: "Email",
+      formMessage: "Message",
+      formSend: "Send message",
+      formSending: "Sending…",
+      formOk: "Thanks! Your message has been sent. I'll get back to you soon.",
+      formErr: "Something went wrong. Please try again, or email me directly.",
+      formOr: "Or reach me directly",
+      formNote: "Sent by email through Web3Forms.",
       liveDemo: "Live demo ↗", code: "Code", project: "Project",
       descLang: "A {lang} project.", descGeneric: "A personal project.",
       skillsKicker: "03 / Skills", skillsTitle: "What I work with",
@@ -145,7 +157,7 @@
       sem5: "Development semester: exchange, electives or self-directed study.",
       sem6: "One specialisation course (10 ECTS) plus free electives.",
       contactKicker: "05 / Contact", contactTitle: "Let's work together",
-      contactLead: "I'm open to internships and part-time roles in software development. Email is the quickest way to reach me.",
+      contactLead: "I'm open to internships and part-time roles in software development. Send me a message below, or reach me directly.",
       copyEmail: "Copy email",
       copyOk: "Email address copied to clipboard.",
       copyFail: "Copy failed. My email is {email}",
@@ -207,6 +219,15 @@
       hsWhen: "Videregående",
       hsTitle: "Vika videregående skole",
       hsDetail: "Realfag med IT2, R2 og fysikk 2.",
+      formName: "Navn",
+      formEmail: "E-post",
+      formMessage: "Melding",
+      formSend: "Send melding",
+      formSending: "Sender…",
+      formOk: "Takk! Meldingen er sendt. Jeg svarer så snart jeg kan.",
+      formErr: "Noe gikk galt. Prøv igjen, eller send meg en e-post direkte.",
+      formOr: "Eller ta kontakt direkte",
+      formNote: "Sendes som e-post via Web3Forms.",
       liveDemo: "Live-demo ↗", code: "Kode", project: "Prosjekt",
       descLang: "Et {lang}-prosjekt.", descGeneric: "Et personlig prosjekt.",
       skillsKicker: "03 / Ferdigheter", skillsTitle: "Det jeg jobber med",
@@ -225,7 +246,7 @@
       sem5: "Utviklingssemester: utveksling, valgemner eller selvstyrt studium.",
       sem6: "Ett spesialiseringsemne (10 studiepoeng) pluss frie valgemner.",
       contactKicker: "05 / Kontakt", contactTitle: "La oss jobbe sammen",
-      contactLead: "Jeg er åpen for internship og deltidsjobber innen programvareutvikling. Det raskeste er å sende meg en e-post.",
+      contactLead: "Jeg er åpen for internship og deltidsjobber innen programvareutvikling. Send meg en melding under, eller ta kontakt direkte.",
       copyEmail: "Kopier e-post",
       copyOk: "E-postadressen er kopiert.",
       copyFail: "Kopiering feilet. E-posten min er {email}",
@@ -452,6 +473,59 @@
   });
 
   $("#year").textContent = new Date().getFullYear();
+
+  /* ---------- Contact form (Web3Forms) ---------- */
+  const formWrap = $("#contact-form-wrap");
+  const form = $("#contact-form");
+  const formStatus = $("#form-status");
+  const sendBtn = $("#form-send");
+  formWrap.hidden = !WEB3FORMS_ACCESS_KEY;
+
+  function setFormStatus(key, kind) {
+    formStatus.dataset.key = key || "";
+    formStatus.textContent = key ? t(key) : "";
+    formStatus.classList.remove("is-ok", "is-error");
+    if (kind) formStatus.classList.add(`is-${kind}`);
+  }
+
+  function refreshFormText() {
+    if (formStatus.dataset.key) formStatus.textContent = t(formStatus.dataset.key);
+    if (!sendBtn.disabled) sendBtn.textContent = t("formSend");
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (sendBtn.disabled || !WEB3FORMS_ACCESS_KEY) return;
+    const data = Object.fromEntries(new FormData(form));
+    if (data.botcheck) return; // honeypot: real visitors never tick this hidden box
+    delete data.botcheck;
+
+    sendBtn.disabled = true;
+    sendBtn.textContent = t("formSending");
+    setFormStatus("", "");
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: "New message from henningtrillhus.no",
+          from_name: "Portfolio contact form",
+          ...data,
+        }),
+      });
+      const result = await res.json().catch(() => ({}));
+      if (!res.ok || !result.success) throw new Error(result.message || `Web3Forms responded ${res.status}`);
+      form.reset();
+      setFormStatus("formOk", "ok");
+    } catch (err) {
+      console.warn("Contact form failed:", err);
+      setFormStatus("formErr", "error");
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.textContent = t("formSend");
+    }
+  });
 
   /* ---------- Projects ---------- */
   const timelineEl = $("#project-timeline");
@@ -920,6 +994,7 @@
     $("#lang-toggle").setAttribute("aria-label", t("langSwitch"));
     $("#lang-toggle").setAttribute("lang", next === "no" ? "en" : "nb");
     renderCurriculum();
+    refreshFormText();
     if (projects.length) {
       renderStats(false);
       renderProjects();

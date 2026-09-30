@@ -628,3 +628,42 @@ html { scrollbar-color: var(--border) var(--bg); }
   #projects, #education { background: none; border: 0; margin-top: 0; padding-bottom: 0; }
   .footer-links { display: none; }
 }
+
+/* ---------- Contact form ---------- */
+.contact-form-wrap { margin: 2rem auto 0; max-width: 36rem; text-align: left; }
+.contact-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.field { display: grid; gap: .4rem; }
+.field-wide { grid-column: 1 / -1; }
+.field label { font-size: .85rem; font-weight: 600; color: var(--muted); }
+.field input, .field textarea {
+  width: 100%;
+  padding: .7rem .9rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 1rem/1.5 var(--font);
+  transition: border-color .15s, box-shadow .15s;
+}
+.field textarea { min-height: 9rem; resize: vertical; }
+.field input:hover, .field textarea:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); }
+.field input:focus-visible, .field textarea:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
+.form-actions .btn:disabled { opacity: .7; cursor: progress; transform: none; }
+.form-note { font-size: .82rem; color: var(--muted); }
+.form-status { min-height: 1.5rem; font-size: .95rem; font-weight: 500; }
+.form-status.is-ok { color: #16a34a; }
+.form-status.is-error { color: #dc2626; }
+:root[data-theme="dark"] .form-status.is-ok { color: #4ade80; }
+:root[data-theme="dark"] .form-status.is-error { color: #f87171; }
+.form-or { display: flex; align-items: center; gap: 1rem; margin: 2rem 0 0; font-size: .85rem; color: var(--muted); }
+.form-or::before, .form-or::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.contact-form-wrap + .cta { margin-top: 1.5rem; }
+
+@media (max-width: 40rem) {
+  .contact-form { grid-template-columns: 1fr; }
+}
+@media print {
+  .contact-form-wrap { display: none !important; }
+}

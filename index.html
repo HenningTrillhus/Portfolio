@@ -289,7 +289,30 @@
         <div class="contact-card reveal">
           <p class="kicker" data-i18n="contactKicker">05 / Contact</p>
           <h2 data-i18n="contactTitle">Let's work together</h2>
-          <p class="lead" data-i18n="contactLead">I'm open to internships and part-time roles in software development. Email is the quickest way to reach me.</p>
+          <p class="lead" data-i18n="contactLead">I'm open to internships and part-time roles in software development. Send me a message below, or reach me directly.</p>
+          <div id="contact-form-wrap" class="contact-form-wrap" hidden>
+            <form id="contact-form" class="contact-form">
+              <div class="field">
+                <label for="cf-name" data-i18n="formName">Name</label>
+                <input id="cf-name" name="name" type="text" autocomplete="name" required maxlength="120">
+              </div>
+              <div class="field">
+                <label for="cf-email" data-i18n="formEmail">Email</label>
+                <input id="cf-email" name="email" type="email" autocomplete="email" required maxlength="200">
+              </div>
+              <div class="field field-wide">
+                <label for="cf-message" data-i18n="formMessage">Message</label>
+                <textarea id="cf-message" name="message" rows="6" required maxlength="5000"></textarea>
+              </div>
+              <input class="hp" type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true">
+              <div class="form-actions field-wide">
+                <button class="btn primary" id="form-send" type="submit" data-i18n="formSend">Send message</button>
+                <p class="form-note" data-i18n="formNote">Sent by email through Web3Forms.</p>
+              </div>
+              <p class="form-status field-wide" id="form-status" role="status" aria-live="polite"></p>
+            </form>
+            <p class="form-or"><span data-i18n="formOr">Or reach me directly</span></p>
+          </div>
           <div class="cta">
             <a class="btn primary" href="mailto:henningtrillhus05@gmail.com">henningtrillhus05@gmail.com</a>
             <button class="btn" type="button" id="copy-email" data-email="henningtrillhus05@gmail.com" data-i18n="copyEmail">Copy email</button>
