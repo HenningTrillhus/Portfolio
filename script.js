@@ -159,6 +159,8 @@
       codeOpenFile: "Open file on GitHub ↗",
       viewReadme: "README",
       viewSwitch: "Switch between README and code",
+      codeExpand: "Expand all",
+      codeCollapse: "Collapse all",
       liveDemo: "Live demo ↗", code: "Code", project: "Project",
       descLang: "A {lang} project.", descGeneric: "A personal project.",
       skillsKicker: "03 / Skills", skillsTitle: "What I work with",
@@ -262,6 +264,8 @@
       codeOpenFile: "Åpne filen på GitHub ↗",
       viewReadme: "README",
       viewSwitch: "Bytt mellom README og kode",
+      codeExpand: "Åpne alle",
+      codeCollapse: "Lukk alle",
       liveDemo: "Live-demo ↗", code: "Kode", project: "Prosjekt",
       descLang: "Et {lang}-prosjekt.", descGeneric: "Et personlig prosjekt.",
       skillsKicker: "03 / Ferdigheter", skillsTitle: "Det jeg jobber med",
@@ -1095,82 +1099,188 @@
 
   const formatSize = (bytes) => (bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(bytes < 10240 ? 1 : 0)} KB`);
 
-  // The file picker: one row of buttons for small flat projects, buttons grouped under their folder for bigger ones.
-  function fileNav(token, file) {
-    const pick = (f) => {
-      token.codeFile = f.path;
-      renderCodePanel();
-      const pressed = pvCode.querySelector('.code-tab[aria-pressed="true"]');
-      if (pressed) pressed.focus({ preventScroll: true });
-      loadSelectedFile();
-    };
-    const button = (f) => {
-      const b = el("button", { className: "code-tab", type: "button" }, f.name);
-      b.setAttribute("aria-pressed", String(f === file));
-      b.setAttribute("aria-label", f.rel);
-      b.addEventListener("click", () => pick(f));
-      return b;
-    };
+  // Every folder on the way to a file ("src", "src/routes", ...), so a file's folders can be opened together.
+  const dirsOf = (file) => {
+    const parts = file.dir ? file.dir.split("/") : [];
+    return parts.map((_, i) => parts.slice(0, i + 1).join("/"));
+  };
 
+  // Re-draws the code panel but keeps the tree's scroll position and (if wanted) keyboard focus on the chosen file.
+  function rerenderCode(keepFocus) {
+    const oldTree = pvCode.querySelector(".tree-panel");
+    const top = oldTree ? oldTree.scrollTop : 0;
+    renderCodePanel();
+    const newTree = pvCode.querySelector(".tree-panel");
+    if (newTree) newTree.scrollTop = top;
+    if (keepFocus) {
+      const pressed = pvCode.querySelector('[aria-pressed="true"]');
+      if (pressed) pressed.focus({ preventScroll: true });
+    }
+  }
+
+  function selectFile(token, f) {
+    token.codeFile = f.path;
+    dirsOf(f).forEach((d) => token.openDirs.add(d));
+    rerenderCode(true);
+    loadSelectedFile();
+  }
+
+  // Small flat projects: one row of file buttons.
+  function fileTabs(token, file) {
     const nav = el("div", { className: "file-nav" });
     nav.setAttribute("role", "group");
     nav.setAttribute("aria-label", t("codeFiles"));
-    if (token.code.flat) {
-      nav.append(el("div", { className: "code-tabs" }, ...token.code.files.map(button)));
-      return nav;
-    }
-    const groups = new Map();
+    const tabs = el("div", { className: "code-tabs" });
     token.code.files.forEach((f) => {
-      if (!groups.has(f.dir)) groups.set(f.dir, []);
-      groups.get(f.dir).push(f);
+      const tab = el("button", { className: "code-tab", type: "button" }, f.name);
+      tab.setAttribute("aria-pressed", String(f === file));
+      tab.addEventListener("click", () => selectFile(token, f));
+      tabs.append(tab);
     });
-    groups.forEach((list, dir) => {
-      const group = el("div", { className: "file-group" });
-      if (dir) group.append(el("p", { className: "file-dir" }, `${dir}/`));
-      group.append(el("div", { className: "code-tabs" }, ...list.map(button)));
-      nav.append(group);
-    });
+    nav.append(tabs);
     return nav;
+  }
+
+  // Projects with folders: a tree where folders open and close. Folders that only contain one folder are joined
+  // ("src/routes/API"), and each folder shows how many files it holds.
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  let treeCounter = 0;
+
+  function chevron() {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("class", "tree-chev");
+    svg.setAttribute("aria-hidden", "true");
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", "m9 6 6 6-6 6");
+    svg.append(path);
+    return svg;
+  }
+
+  function buildTree(files) {
+    const root = { name: "", path: "", dirs: new Map(), files: [] };
+    files.forEach((f) => {
+      let node = root;
+      let path = "";
+      (f.dir ? f.dir.split("/") : []).forEach((part) => {
+        path = path ? `${path}/${part}` : part;
+        if (!node.dirs.has(part)) node.dirs.set(part, { name: part, path, dirs: new Map(), files: [] });
+        node = node.dirs.get(part);
+      });
+      node.files.push(f);
+    });
+    return root;
+  }
+
+  function countFiles(node) {
+    let n = node.files.length;
+    node.dirs.forEach((d) => { n += countFiles(d); });
+    return n;
+  }
+
+  function fileTree(token, file) {
+    const openDirs = token.openDirs;
+
+    const listFor = (node) => {
+      const list = el("ul", { className: "tree-list" });
+      [...node.dirs.values()].sort((a, b) => a.name.localeCompare(b.name)).forEach((dir) => {
+        let target = dir;
+        let label = dir.name;
+        while (!target.files.length && target.dirs.size === 1) {
+          target = [...target.dirs.values()][0];
+          label += `/${target.name}`;
+        }
+        const count = el("span", { className: "tree-count" }, String(countFiles(target)));
+        count.setAttribute("aria-hidden", "true");
+        const toggle = el("button", { className: "tree-toggle", type: "button" }, chevron(), el("span", { className: "tree-name" }, label), count);
+        const open = openDirs.has(target.path);
+        const children = listFor(target);
+        children.id = `tree-${(treeCounter += 1)}`;
+        children.hidden = !open;
+        toggle.dataset.path = target.path;
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.setAttribute("aria-controls", children.id);
+        toggle.addEventListener("click", () => {
+          const now = toggle.getAttribute("aria-expanded") !== "true";
+          toggle.setAttribute("aria-expanded", String(now));
+          children.hidden = !now;
+          if (now) openDirs.add(target.path); else openDirs.delete(target.path);
+        });
+        list.append(el("li", { className: "tree-dir" }, toggle, children));
+      });
+      node.files.forEach((f) => {
+        const button = el("button", { className: "tree-file-btn", type: "button" }, f.name);
+        button.setAttribute("aria-pressed", String(f === file));
+        button.setAttribute("aria-label", f.rel);
+        button.addEventListener("click", () => selectFile(token, f));
+        list.append(el("li", { className: "tree-file" }, button));
+      });
+      return list;
+    };
+
+    const setAll = (open) => {
+      panel.querySelectorAll(".tree-toggle").forEach((btn) => {
+        btn.setAttribute("aria-expanded", String(open));
+        btn.nextElementSibling.hidden = !open;
+        if (open) openDirs.add(btn.dataset.path); else openDirs.delete(btn.dataset.path);
+      });
+    };
+    const expand = el("button", { className: "code-action", type: "button" }, t("codeExpand"));
+    const collapse = el("button", { className: "code-action", type: "button" }, t("codeCollapse"));
+    expand.addEventListener("click", () => setAll(true));
+    collapse.addEventListener("click", () => setAll(false));
+
+    const panel = el("div", { className: "tree-panel" },
+      el("div", { className: "tree-bar" }, el("span", {}, t("codeFiles")), el("span", { className: "tree-actions" }, expand, collapse)),
+      listFor(buildTree(token.code.files)));
+    panel.setAttribute("role", "group");
+    panel.setAttribute("aria-label", t("codeFiles"));
+    return panel;
+  }
+
+  // The chosen file: its name and size, copy button and the code itself (or a short message while it loads).
+  function fileBody(file) {
+    if (file.tooLarge) return [el("p", { className: "muted" }, t("codeTooLarge"))];
+    if (file.failed) return [el("p", { className: "muted" }, t("codeError"))];
+    if (file.text === undefined) return [el("p", { className: "muted" }, t("codeLoading"))];
+
+    const ext = (file.name.split(".").pop() || "").toLowerCase();
+    const lineCount = file.text.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n").length;
+    const copyBtn = el("button", { className: "code-action", type: "button" }, t("codeCopy"));
+    copyBtn.addEventListener("click", async () => {
+      const ok = await copyToClipboard(file.text);
+      copyBtn.textContent = ok ? t("codeCopied") : t("codeError");
+      setTimeout(() => { copyBtn.textContent = t("codeCopy"); }, 2000);
+    });
+    const meta = el("div", { className: "code-meta" },
+      el("span", {}, file.rel),
+      el("span", {}, t("codeMeta", { lines: lineCount, size: formatSize(file.size) })),
+      el("span", { className: "code-spacer" }),
+      copyBtn,
+      ...(file.page ? [el("a", { className: "code-action", href: file.page, target: "_blank", rel: "noopener" }, t("codeOpenFile"))] : []));
+    const pre = el("pre", { className: "code-pre" });
+    pre.tabIndex = 0; // scrollable, so it must be reachable with the keyboard
+    pre.setAttribute("role", "group");
+    pre.setAttribute("aria-label", file.rel);
+    const codeEl = el("code", {});
+    codeEl.append(buildCode(file.text, LANG_OF_EXT[ext]));
+    pre.append(codeEl);
+    return [meta, pre];
   }
 
   function renderCodePanel() {
     const token = current;
     if (!token || !token.hasCode) { pvCode.replaceChildren(); return; }
-    const file = token.code.files.find((f) => f.path === token.codeFile) || token.code.files[0];
+    const files = token.code.files;
+    const file = files.find((f) => f.path === token.codeFile) || files[0];
     const content = [el("h2", { className: "sr-only" }, t("codeTitle"))];
-    if (token.code.files.length > 1) content.push(fileNav(token, file));
-
-    if (file.tooLarge) {
-      content.push(el("p", { className: "muted" }, t("codeTooLarge")));
-    } else if (file.failed) {
-      content.push(el("p", { className: "muted" }, t("codeError")));
-    } else if (file.text === undefined) {
-      content.push(el("p", { className: "muted" }, t("codeLoading")));
+    if (files.length > 1 && !token.code.flat) {
+      // Folders: the tree sits beside the code on wide screens and above it on narrow ones.
+      content.push(el("div", { className: "code-layout" }, fileTree(token, file), el("div", { className: "code-main" }, ...fileBody(file))));
     } else {
-      const ext = (file.name.split(".").pop() || "").toLowerCase();
-      const lineCount = file.text.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n").length;
-      const copyBtn = el("button", { className: "code-action", type: "button" }, t("codeCopy"));
-      copyBtn.addEventListener("click", async () => {
-        const ok = await copyToClipboard(file.text);
-        copyBtn.textContent = ok ? t("codeCopied") : t("codeError");
-        setTimeout(() => { copyBtn.textContent = t("codeCopy"); }, 2000);
-      });
-      const meta = el("div", { className: "code-meta" },
-        el("span", {}, file.rel),
-        el("span", {}, t("codeMeta", { lines: lineCount, size: formatSize(file.size) })),
-        el("span", { className: "code-spacer" }),
-        copyBtn,
-        ...(file.page ? [el("a", { className: "code-action", href: file.page, target: "_blank", rel: "noopener" }, t("codeOpenFile"))] : []));
-      const pre = el("pre", { className: "code-pre" });
-      pre.tabIndex = 0; // scrollable, so it must be reachable with the keyboard
-      pre.setAttribute("role", "group");
-      pre.setAttribute("aria-label", file.rel);
-      const codeEl = el("code", {});
-      codeEl.append(buildCode(file.text, LANG_OF_EXT[ext]));
-      pre.append(codeEl);
-      content.push(meta, pre);
+      if (files.length > 1) content.push(fileTabs(token, file));
+      content.push(...fileBody(file));
     }
-
     pvCode.replaceChildren(...content);
   }
 
@@ -1191,14 +1301,7 @@
         file.failed = true;
       }
     }
-    if (current === token) {
-      const hadFocus = pvCode.contains(document.activeElement);
-      renderCodePanel();
-      if (hadFocus) {
-        const pressed = pvCode.querySelector('.code-tab[aria-pressed="true"]');
-        if (pressed) pressed.focus({ preventScroll: true });
-      }
-    }
+    if (current === token) rerenderCode(pvCode.contains(document.activeElement));
   }
 
   /* ---------- README / Code switch ---------- */
@@ -1271,7 +1374,7 @@
       setMenu(false);
       scrollTo({ top: 0, behavior: "instant" });
     }
-    const token = { owner, repo, readme: null, code: null, decided: false, hasReadme: false, hasCode: false, view: "readme", codeFile: null };
+    const token = { owner, repo, readme: null, code: null, decided: false, hasReadme: false, hasCode: false, view: "readme", codeFile: null, openDirs: new Set() };
     current = token;
     pvSwitch.replaceChildren(); // clear what the previous project left behind
     pvCode.replaceChildren();
@@ -1297,7 +1400,11 @@
     }
 
     Object.assign(token, { readme: result, code, hasReadme, hasCode, decided: true, view: hasReadme ? "readme" : "code" });
-    if (hasCode) token.codeFile = pickEntry(code.files).path;
+    if (hasCode) {
+      const entry = pickEntry(code.files);
+      token.codeFile = entry.path;
+      token.openDirs = new Set(dirsOf(entry)); // start with the folders of the first file open
+    }
     renderPane();
     if (token.view === "code") loadSelectedFile();
   }
