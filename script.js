@@ -11,6 +11,8 @@
   // How each project was made. Repos in neither list end up under "More projects".
   const HAND_CODED = ["first-project", "Deepvein", "3D-Shooter", "Zeptrico", "UnityRPG", "Game-Of-Life-Conway"];
   const VIBE_CODED = ["Kollokvie-IFI", "duolist", "Min-Munch", "Leilighet-Designer-"];
+  // Small projects whose source code can be read on their project page (by repo name).
+  const CODE_VIEWER_REPOS = ["Leilighet-Designer-", "Game-Of-Life-Conway"];
   // Live sites for projects that have no website set on GitHub (by repo name). Optional.
   const LIVE_URLS = {
     "Leilighet-Designer-": "https://henningtrillhus.github.io/Leilighet-Designer-/", // hosted on GitHub Pages
@@ -146,6 +148,17 @@
       formNote: "Sent by email through Web3Forms.",
       formConsent: "I agree that my name, email address and message are used to reply to me, and that they are handled as described in the <a href=\"privacy.html\" target=\"_blank\" rel=\"noopener\">privacy policy</a>.",
       privacyLink: "Privacy policy",
+      viewCode: "View code",
+      hideCode: "Hide code",
+      codeTitle: "Code",
+      codeFiles: "Files",
+      codeLoading: "Loading code…",
+      codeError: "Couldn't load the code right now.",
+      codeTooLarge: "This file is too large to show here. Open it on GitHub instead.",
+      codeMeta: "{lines} lines · {size}",
+      codeCopy: "Copy code",
+      codeCopied: "Copied!",
+      codeOpenFile: "Open file on GitHub ↗",
       liveDemo: "Live demo ↗", code: "Code", project: "Project",
       descLang: "A {lang} project.", descGeneric: "A personal project.",
       skillsKicker: "03 / Skills", skillsTitle: "What I work with",
@@ -238,6 +251,17 @@
       formNote: "Sendes som e-post via Web3Forms.",
       formConsent: "Jeg samtykker til at navn, e-postadresse og melding brukes til å svare meg, og at de behandles slik det står i <a href=\"privacy.html\" target=\"_blank\" rel=\"noopener\">personvernerklæringen</a>.",
       privacyLink: "Personvernerklæring",
+      viewCode: "Vis koden",
+      hideCode: "Skjul koden",
+      codeTitle: "Kode",
+      codeFiles: "Filer",
+      codeLoading: "Laster koden…",
+      codeError: "Kunne ikke laste koden akkurat nå.",
+      codeTooLarge: "Denne filen er for stor til å vises her. Åpne den på GitHub i stedet.",
+      codeMeta: "{lines} linjer · {size}",
+      codeCopy: "Kopier koden",
+      codeCopied: "Kopiert!",
+      codeOpenFile: "Åpne filen på GitHub ↗",
       liveDemo: "Live-demo ↗", code: "Kode", project: "Prosjekt",
       descLang: "Et {lang}-prosjekt.", descGeneric: "Et personlig prosjekt.",
       skillsKicker: "03 / Ferdigheter", skillsTitle: "Det jeg jobber med",
@@ -726,6 +750,7 @@
   const pvHead = $("#pv-head");
   const pvReadme = $("#pv-readme");
   const pvBack = $("#pv-back");
+  const pvCode = $("#pv-code");
   const readmeCache = new Map();
   let current = null;
   let cameFromHome = false;
@@ -890,6 +915,7 @@
     if (!current || !current.readme) return;
     const { owner, repo, readme } = current;
     const ghUrl = githubUrlFor(owner, repo);
+    if (readme.status === "none") { pvReadme.replaceChildren(); return; }
     if (readme.status === "ok") {
       pvReadme.replaceChildren(
         sanitizeReadme(readme.html, owner, repo),
@@ -905,12 +931,230 @@
     }
   }
 
+  /* ---------- Code viewer: source code on the project page (only for CODE_VIEWER_REPOS) ---------- */
+  const isCodeRepo = (repo) => CODE_VIEWER_REPOS.includes(repo);
+  const CODE_FILE = /\.(py|js|mjs|cjs|ts|tsx|jsx|html?|css|json|txt|sh|cs)$/i;
+  const MAX_FILE_BYTES = 300 * 1024;
+  const MAX_LINES = 4000;
+  const codeCache = new Map();
+
+  const wordSet = (words) => new Set(words.split(" "));
+  const PY_KEYWORDS = wordSet("and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield None True False self");
+  const PY_BUILTINS = wordSet("print len range int str float list dict set tuple bool open input min max sum abs enumerate zip map filter sorted reversed super isinstance type");
+  const JS_KEYWORDS = wordSet("async await break case catch class const continue debugger default delete do else export extends false finally for from function if import in instanceof let new null of return static super switch this throw true try typeof undefined var void while with yield");
+
+  // A small syntax highlighter. Each language is one regular expression; the groups say what kind of token matched.
+  const TOKEN_RULES = {
+    py: {
+      re: /(#[^\n]*)|("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)/g,
+      classify: (m) => (m[1] ? "c" : m[2] ? "s" : m[3] ? "n" : PY_KEYWORDS.has(m[4]) ? "k" : PY_BUILTINS.has(m[4]) ? "f" : ""),
+    },
+    js: {
+      re: /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\[\s\S]|[^`\\])*`)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)/g,
+      classify: (m, text) => (m[1] ? "c" : m[2] ? "s" : m[3] ? "n" : JS_KEYWORDS.has(m[4]) ? "k" : text[m.index + m[0].length] === "(" ? "f" : ""),
+    },
+    css: {
+      re: /(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|(@[\w-]+)|(#[0-9a-fA-F]{3,8}\b|-?\b\d*\.?\d+(?:px|rem|em|%|vh|vw|s|ms|deg|fr)?\b)|([\w-]+)(?=\s*:[^;{}]*[;}])/g,
+      classify: (m) => (m[1] ? "c" : m[2] ? "s" : m[3] ? "k" : m[4] ? "n" : "a"),
+    },
+    html: {
+      re: /(<!--[\s\S]*?-->)|(<\/?[A-Za-z][\w:-]*)|([A-Za-z_:][\w:.-]*)(\s*=\s*)("[^"]*"|'[^']*')|(\/?>)/g,
+      classify: (m) => (m[1] ? "c" : m[2] ? "f" : m[3] ? [["a", m[3]], ["", m[4]], ["s", m[5]]] : ""),
+    },
+  };
+  const LANG_OF_EXT = { py: "py", js: "js", mjs: "js", cjs: "js", css: "css", html: "html", htm: "html" };
+
+  function tokenize(text, lang) {
+    const rules = TOKEN_RULES[lang];
+    if (!rules) return [["", text]];
+    const out = [];
+    let last = 0;
+    let m;
+    rules.re.lastIndex = 0;
+    while ((m = rules.re.exec(text))) {
+      if (m[0] === "") { rules.re.lastIndex++; continue; }
+      if (m.index > last) out.push(["", text.slice(last, m.index)]);
+      const kind = rules.classify(m, text);
+      if (Array.isArray(kind)) out.push(...kind);
+      else out.push([kind, m[0]]);
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) out.push(["", text.slice(last)]);
+    return out;
+  }
+
+  // Turns source text into one <span class="line"> per line, built with text nodes only (nothing is parsed as HTML).
+  function buildCode(text, lang) {
+    const lines = document.createDocumentFragment();
+    let line = el("span", { className: "line" });
+    let count = 0;
+    const endLine = () => { lines.append(line); line = el("span", { className: "line" }); count += 1; };
+    for (const [type, str] of tokenize(text.replace(/\r\n?/g, "\n"), lang)) {
+      const pieces = str.split("\n");
+      for (let i = 0; i < pieces.length; i += 1) {
+        if (i > 0) endLine();
+        if (count >= MAX_LINES) return lines;
+        if (pieces[i]) line.append(type ? el("span", { className: `t-${type}` }, pieces[i]) : document.createTextNode(pieces[i]));
+      }
+    }
+    if (line.childNodes.length) lines.append(line);
+    return lines;
+  }
+
+  async function getCodeFiles(owner, repo) {
+    const key = `${owner}/${repo}`.toLowerCase();
+    if (codeCache.has(key)) return codeCache.get(key);
+    try {
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, {
+        headers: { Accept: "application/vnd.github+json" },
+      });
+      if (!res.ok) return { status: "error" };
+      const items = await res.json();
+      const files = (Array.isArray(items) ? items : [])
+        .filter((i) => i.type === "file" && CODE_FILE.test(i.name) && !/^readme/i.test(i.name) && safeUrl(i.download_url))
+        .map((i) => ({ name: i.name, size: i.size, url: safeUrl(i.download_url), page: safeUrl(i.html_url) }));
+      const result = { status: "ok", files };
+      codeCache.set(key, result);
+      return result;
+    } catch {
+      return { status: "error" };
+    }
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const ta = el("textarea", { value: text });
+      ta.style.cssText = "position:fixed;opacity:0";
+      document.body.append(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch { /* ignore */ }
+      ta.remove();
+      return ok;
+    }
+  }
+
+  const formatSize = (bytes) => (bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(bytes < 10240 ? 1 : 0)} KB`);
+
+  function renderCodePanel() {
+    if (!current || !current.code) return;
+    const token = current;
+    const { owner, repo, code } = token;
+
+    if (code.status !== "ok" || !code.files.length) {
+      pvCode.hidden = false;
+      pvCode.replaceChildren(el("div", { className: "readme-error" },
+        el("p", {}, t("codeError")),
+        el("a", { className: "btn primary", href: githubUrlFor(owner, repo), target: "_blank", rel: "noopener" }, t("pvGitHub"))));
+      return;
+    }
+
+    const file = code.files.find((f) => f.name === token.codeFile) || code.files[0];
+    const toggle = el("button", { className: "btn", type: "button" }, t(token.codeOpen ? "hideCode" : "viewCode"));
+    toggle.setAttribute("aria-expanded", String(token.codeOpen));
+    toggle.setAttribute("aria-controls", "code-body");
+    toggle.addEventListener("click", () => {
+      token.codeOpen = !token.codeOpen;
+      renderCodePanel();
+      loadSelectedFile();
+    });
+
+    const body = el("div", { className: "code-body", id: "code-body" });
+    body.hidden = !token.codeOpen;
+
+    if (code.files.length > 1) {
+      const tabs = el("div", { className: "code-tabs" });
+      tabs.setAttribute("role", "group");
+      tabs.setAttribute("aria-label", t("codeFiles"));
+      code.files.forEach((f) => {
+        const tab = el("button", { className: "code-tab", type: "button" }, f.name);
+        tab.setAttribute("aria-pressed", String(f === file));
+        tab.addEventListener("click", () => { token.codeFile = f.name; renderCodePanel(); loadSelectedFile(); });
+        tabs.append(tab);
+      });
+      body.append(tabs);
+    }
+
+    if (file.tooLarge) {
+      body.append(el("p", { className: "muted" }, t("codeTooLarge")));
+    } else if (file.failed) {
+      body.append(el("p", { className: "muted" }, t("codeError")));
+    } else if (file.text === undefined) {
+      body.append(el("p", { className: "muted" }, t("codeLoading")));
+    } else {
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      const lineCount = file.text.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n").length;
+      const copyBtn = el("button", { className: "code-action", type: "button" }, t("codeCopy"));
+      copyBtn.addEventListener("click", async () => {
+        const ok = await copyToClipboard(file.text);
+        copyBtn.textContent = ok ? t("codeCopied") : t("codeError");
+        setTimeout(() => { copyBtn.textContent = t("codeCopy"); }, 2000);
+      });
+      const meta = el("div", { className: "code-meta" },
+        el("span", {}, file.name),
+        el("span", {}, t("codeMeta", { lines: lineCount, size: formatSize(file.size) })),
+        el("span", { className: "code-spacer" }),
+        copyBtn,
+        ...(file.page ? [el("a", { className: "code-action", href: file.page, target: "_blank", rel: "noopener" }, t("codeOpenFile"))] : []));
+      const pre = el("pre", { className: "code-pre" });
+      pre.tabIndex = 0; // scrollable, so it must be reachable with the keyboard
+      pre.setAttribute("role", "group");
+      pre.setAttribute("aria-label", file.name);
+      const codeEl = el("code", {});
+      codeEl.append(buildCode(file.text, LANG_OF_EXT[ext]));
+      pre.append(codeEl);
+      body.append(meta, pre);
+    }
+
+    pvCode.hidden = false;
+    pvCode.replaceChildren(el("div", { className: "code-head" }, el("h2", {}, t("codeTitle")), toggle), body);
+  }
+
+  async function loadSelectedFile() {
+    const token = current;
+    if (!token || !token.code || token.code.status !== "ok" || !token.codeOpen) return;
+    const file = token.code.files.find((f) => f.name === token.codeFile);
+    if (!file || file.text !== undefined || file.failed || file.tooLarge) return;
+    if (file.size > MAX_FILE_BYTES) {
+      file.tooLarge = true;
+    } else {
+      try {
+        const res = await fetch(file.url);
+        if (!res.ok) throw new Error(`GitHub responded ${res.status}`);
+        file.text = await res.text();
+      } catch (err) {
+        console.warn("Could not load file:", err);
+        file.failed = true;
+      }
+    }
+    if (current === token) renderCodePanel();
+  }
+
+  async function loadCode(token) {
+    pvCode.hidden = false;
+    pvCode.replaceChildren(el("p", { className: "muted" }, t("codeLoading")));
+    token.code = await getCodeFiles(token.owner, token.repo);
+    if (current !== token) return;
+    if (token.code.status === "ok" && token.code.files.length) {
+      const files = token.code.files;
+      token.codeFile = (files.find((f) => /^(index\.html|main\.py)$/i.test(f.name)) || files[0]).name;
+      // Open straight away when there is nothing else to read (no README) or only a single file.
+      token.codeOpen = !token.readme || token.readme.status !== "ok" || files.length === 1;
+    }
+    renderCodePanel();
+    loadSelectedFile();
+  }
+
   // Re-draws the project page (heading, tags and README) after a language switch or fresh project data.
   function refreshProjectView() {
     if (!current) return;
     renderProjectView();
     if (current.readme) renderReadme();
     else pvReadme.replaceChildren(el("p", { className: "muted" }, t("pvLoading")));
+    renderCodePanel();
   }
 
   async function showProject(owner, repo) {
@@ -925,15 +1169,17 @@
       setMenu(false);
       scrollTo({ top: 0, behavior: "instant" });
     }
-    const token = { owner, repo, readme: null };
+    const token = { owner, repo, readme: null, code: null, codeOpen: false, codeFile: null };
     current = token;
+    pvCode.hidden = true;
+    pvCode.replaceChildren();
     refreshProjectView();
     const heading = pvHead.querySelector("h1");
     if (heading) heading.focus({ preventScroll: true }); // keyboard and screen-reader users land on the new page
 
     const result = await getReadme(owner, repo);
     if (current !== token) return;
-    if (result.status === "none") {
+    if (result.status === "none" && !isCodeRepo(repo)) {
       // No README: skip our page and go straight to the repository on GitHub.
       history.replaceState(null, "", location.pathname + location.search);
       location.replace(githubUrlFor(owner, repo));
@@ -941,6 +1187,7 @@
     }
     token.readme = result;
     renderReadme();
+    if (isCodeRepo(repo)) loadCode(token);
   }
 
   function showHome() {
@@ -974,7 +1221,7 @@
     if (cardEl) cardEl.classList.add("busy");
     const result = await getReadme(owner, repo);
     if (cardEl) cardEl.classList.remove("busy");
-    if (result.status === "none") { location.href = gh; return; }
+    if (result.status === "none" && !isCodeRepo(repo)) { location.href = gh; return; }
     history.replaceState({ ...(history.state || {}), scroll: scrollY }, "");
     cameFromHome = true;
     lastOpened = { owner, repo };

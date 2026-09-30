@@ -693,3 +693,67 @@ html[data-lang="no"] [data-lang-block="en"] { display: none; }
 /* ---------- Audit fixes ---------- */
 pre[tabindex]:focus-visible, .readme table:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .pv-head h1:focus { outline: none; }
+
+/* ---------- Code viewer ---------- */
+.codeview { margin-top: 3rem; max-width: 64rem; }
+.code-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem 1rem; margin-bottom: 1rem; }
+.code-head h2 { font-size: 1.6rem; font-weight: 800; letter-spacing: -.02em; }
+.code-tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .9rem; }
+.code-tab {
+  padding: .4rem .9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  font: 500 .85rem var(--mono);
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.code-tab:hover { color: var(--text); border-color: var(--accent); }
+.code-tab[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.code-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1rem; margin-bottom: .6rem; font-size: .85rem; color: var(--muted); }
+.code-meta span:first-child { color: var(--text); font: 500 .85rem var(--mono); }
+.code-spacer { margin-left: auto; }
+.code-action {
+  padding: .3rem .7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: 600 .82rem var(--font);
+  text-decoration: none;
+  cursor: pointer;
+}
+.code-action:hover { border-color: var(--accent); }
+.code-pre {
+  margin: 0;
+  padding: 1rem 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--code-bg);
+  color: var(--code-text);
+  overflow: auto;
+  max-height: 75vh;
+  font: 400 .85rem/1.6 var(--mono);
+  counter-reset: ln;
+  tab-size: 4;
+}
+.code-pre code { display: block; width: max-content; min-width: 100%; font: inherit; }
+.code-pre .line { display: block; min-height: 1.6em; padding-right: 1.2rem; white-space: pre; }
+.code-pre .line::before {
+  counter-increment: ln;
+  content: counter(ln);
+  display: inline-block;
+  width: 3.4em;
+  padding-right: 1.2em;
+  text-align: right;
+  color: #8a8a9a;
+  user-select: none;
+}
+.t-k { color: #c4a5ff; }
+.t-s { color: #86efac; }
+.t-c { color: #9a9aaa; font-style: italic; }
+.t-n { color: #fbbf24; }
+.t-f { color: #7dd3fc; }
+.t-a { color: #93c5fd; }
+@media print { .codeview { display: none !important; } }

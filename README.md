@@ -12,6 +12,7 @@ The site is available in **English and Norwegian**, follows your light/dark pref
 - **Project timelines.** Projects are grouped into *Hand-coded* and *Vibe-coded*, then by year, newest first. Older work from before GitHub and from my earlier account is included, with notes where it predates AI coding tools.
 - **Live data from GitHub.** Repositories are loaded from the GitHub API and cached for an hour. If GitHub can't be reached, a built-in fallback list is shown instead.
 - **Project pages with README.** Clicking a project opens its README inside the site (`#/p/owner/repo`). Repositories without a README go straight to GitHub. README HTML is rebuilt from an allow-list before it is shown.
+- **Code viewer.** A few small projects (listed in `CODE_VIEWER_REPOS`) show their source code on their project page, with file tabs, line numbers, simple syntax highlighting and a copy button. It opens straight away when there is only one file or no README.
 - **Degree curriculum.** A semester-by-semester view of the programme, with links to the UiO course pages.
 - **Background.** Education, and a note on the break from development during military service.
 - **Contact form** powered by [Web3Forms](https://web3forms.com), with validation, a consent checkbox, a spam honeypot and sending/success/error states.
@@ -56,6 +57,7 @@ Most content lives at the top of `script.js`:
 | --- | --- |
 | Which repos are hand-coded or vibe-coded | `HAND_CODED` and `VIBE_CODED` |
 | Hide a repo from the site | `HIDDEN_REPOS` |
+| Projects that show their code on the site | `CODE_VIEWER_REPOS` |
 | Nicer project descriptions (EN and NO) | `DESCRIPTIONS` |
 | Projects that aren't on this GitHub account | `OLDER_PROJECTS` |
 | Courses to mark as completed | `COMPLETED_COURSES` |
