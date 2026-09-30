@@ -106,7 +106,7 @@
       factLanguages: "Languages", factLanguagesValue: "Norwegian, English",
       projectsKicker: "02 / Projects", projectsTitle: "Things I've built",
       projectsSub: "Everything I've built, with a clear split between what I coded myself and what I built with AI (vibe coding). Newest first, loaded live from my <a href=\"https://github.com/HenningTrillhus\" target=\"_blank\" rel=\"noopener\">GitHub profile</a> plus older projects from my <a href=\"https://github.com/HenningT05\" target=\"_blank\" rel=\"noopener\">earlier account</a>.",
-      loading: "Loading projects…", noProjects: "Projects coming soon.",
+      loading: "Loading projects…",
       handTitle: "Hand-coded", handDesc: "Written by me, line by line.",
       vibeTitle: "Vibe-coded", vibeDesc: "Built by describing what I want to an AI and steering the result. Quick for prototyping, and I'm upfront that the AI wrote most of the code.",
       otherTitle: "More projects", otherDesc: "More projects from my GitHub.",
@@ -121,6 +121,7 @@
       backToProjects: "Back to projects",
       pvLoading: "Loading README from GitHub…",
       pvError: "Couldn't load the README right now.",
+      pvRetry: "Try again",
       pvGitHub: "View on GitHub ↗",
       pvFrom: "README fetched live from GitHub.",
       milWhen: "2025 – 2026",
@@ -197,7 +198,7 @@
       factLanguages: "Språk", factLanguagesValue: "Norsk, engelsk",
       projectsKicker: "02 / Prosjekter", projectsTitle: "Ting jeg har bygget",
       projectsSub: "Alt jeg har bygget, med et tydelig skille mellom det jeg har kodet selv og det jeg har bygget med KI (vibekoding). Nyeste først, hentet direkte fra <a href=\"https://github.com/HenningTrillhus\" target=\"_blank\" rel=\"noopener\">GitHub-profilen min</a>, pluss eldre prosjekter fra <a href=\"https://github.com/HenningT05\" target=\"_blank\" rel=\"noopener\">min tidligere konto</a>.",
-      loading: "Laster prosjekter…", noProjects: "Prosjekter kommer snart.",
+      loading: "Laster prosjekter…",
       handTitle: "Håndkodet", handDesc: "Skrevet av meg selv, linje for linje.",
       vibeTitle: "Vibekodet", vibeDesc: "Laget ved å beskrive for en KI hva jeg vil ha, og styre resultatet. Raskt for prototyping, og jeg er åpen om at KI skrev det meste av koden.",
       otherTitle: "Flere prosjekter", otherDesc: "Flere prosjekter fra GitHub-profilen min.",
@@ -212,6 +213,7 @@
       backToProjects: "Tilbake til prosjektene",
       pvLoading: "Laster README fra GitHub…",
       pvError: "Kunne ikke laste README akkurat nå.",
+      pvRetry: "Prøv igjen",
       pvGitHub: "Se på GitHub ↗",
       pvFrom: "README hentet direkte fra GitHub.",
       milWhen: "2025 – 2026",
@@ -404,7 +406,10 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && nav.classList.contains("open")) { setMenu(false); navBtn.focus(); }
   });
-  matchMedia("(min-width: 48.01rem)").addEventListener("change", (e) => { if (e.matches) setMenu(false); });
+  document.addEventListener("click", (e) => {
+    if (nav.classList.contains("open") && !e.target.closest(".site-header")) setMenu(false);
+  });
+  matchMedia("(min-width: 56.01rem)").addEventListener("change", (e) => { if (e.matches) setMenu(false); });
 
   /* ---------- Reveal on scroll ---------- */
   const revealObserver = "IntersectionObserver" in window
@@ -643,10 +648,12 @@
   }
 
   function countUp(node, target, animate) {
+    const id = (node._countId = (node._countId || 0) + 1); // a newer call cancels any running animation
     if (!animate || reduceMotion || document.hidden || target === 0) { node.textContent = String(target); return; }
     const start = performance.now();
     const duration = 900;
     const step = (now) => {
+      if (node._countId !== id) return;
       const p = Math.min((now - start) / duration, 1);
       node.textContent = String(Math.round(target * (1 - Math.pow(1 - p, 3))));
       if (p < 1) requestAnimationFrame(step);
@@ -688,11 +695,23 @@
     }
   }
 
+  const signature = (list) =>
+    JSON.stringify(list.map((p) => [p.name, p.created, p.homepage, p.rawDescription, p.language, p.stars, p.made]));
+
   async function loadProjects() {
-    projects = normalise(await fetchRepos());
+    const cached = readCache();
+    projects = normalise(cached ? cached.repos : FALLBACK_REPOS);
     renderStats(true);
     renderProjects();
-    if (current) { renderProjectView(); renderReadme(); }
+    refreshProjectView();
+
+    const fresh = normalise(await fetchRepos());
+    if (signature(fresh) !== signature(projects)) {
+      projects = fresh;
+      renderStats(false);
+      renderProjects();
+      refreshProjectView();
+    }
   }
 
   /* ---------- Project pages: README from GitHub, shown at #/p/owner/repo ---------- */
@@ -706,6 +725,7 @@
   const readmeCache = new Map();
   let current = null;
   let cameFromHome = false;
+  let lastOpened = null;
 
   const ALLOWED_TAGS = new Set(["A", "ABBR", "B", "BLOCKQUOTE", "BR", "CODE", "DD", "DEL", "DETAILS", "DIV", "DL", "DT", "EM",
     "H1", "H2", "H3", "H4", "H5", "H6", "HR", "I", "INS", "KBD", "LI", "OL", "P", "PRE", "Q", "S", "SPAN", "STRONG", "SUB",
@@ -796,6 +816,7 @@
 
         const heading = /^H([1-6])$/.exec(tag);
         const copy = document.createElement(heading ? `h${Math.min(6, Number(heading[1]) + 1)}` : tag.toLowerCase());
+        if (tag === "PRE" || tag === "TABLE") copy.tabIndex = 0;
         if (heading) {
           const anchor = node.parentElement && node.parentElement.querySelector(":scope > a.anchor[id]");
           if (anchor) copy.id = anchor.id;
@@ -856,7 +877,7 @@
       links.append(el("a", { className: "btn", href: project.homepage, target: "_blank", rel: "noopener" }, t("liveDemo")));
     }
 
-    pvHead.replaceChildren(tags, el("h1", {}, name),
+    pvHead.replaceChildren(tags, el("h1", { tabIndex: -1 }, name),
       ...(project ? [el("p", { className: "pv-desc" }, describe(project))] : []), links);
     document.title = `${name} – Henning Trillhus`;
   }
@@ -870,10 +891,22 @@
         sanitizeReadme(readme.html, owner, repo),
         el("p", { className: "readme-note" }, `${t("pvFrom")} `, el("a", { href: ghUrl, target: "_blank", rel: "noopener" }, t("pvGitHub"))));
     } else {
+      const retry = el("button", { className: "btn", type: "button" }, t("pvRetry"));
+      retry.addEventListener("click", () => showProject(owner, repo));
       pvReadme.replaceChildren(el("div", { className: "readme-error" },
         el("p", {}, t("pvError")),
-        el("a", { className: "btn primary", href: ghUrl, target: "_blank", rel: "noopener" }, t("pvGitHub"))));
+        el("div", { className: "pv-links" },
+          el("a", { className: "btn primary", href: ghUrl, target: "_blank", rel: "noopener" }, t("pvGitHub")),
+          retry)));
     }
+  }
+
+  // Re-draws the project page (heading, tags and README) after a language switch or fresh project data.
+  function refreshProjectView() {
+    if (!current) return;
+    renderProjectView();
+    if (current.readme) renderReadme();
+    else pvReadme.replaceChildren(el("p", { className: "muted" }, t("pvLoading")));
   }
 
   async function showProject(owner, repo) {
@@ -890,8 +923,9 @@
     }
     const token = { owner, repo, readme: null };
     current = token;
-    renderProjectView();
-    pvReadme.replaceChildren(el("p", { className: "muted" }, t("pvLoading")));
+    refreshProjectView();
+    const heading = pvHead.querySelector("h1");
+    if (heading) heading.focus({ preventScroll: true }); // keyboard and screen-reader users land on the new page
 
     const result = await getReadme(owner, repo);
     if (current !== token) return;
@@ -917,6 +951,10 @@
     if (saved !== null) scrollTo({ top: saved, behavior: "instant" });
     else if (target) target.scrollIntoView();
     else scrollTo({ top: 0, behavior: "instant" });
+    if (lastOpened) {
+      const origin = document.querySelector(`a[data-owner="${CSS.escape(lastOpened.owner)}"][data-repo="${CSS.escape(lastOpened.repo)}"]`);
+      if (origin) origin.focus({ preventScroll: true }); // put keyboard focus back where the visitor came from
+    }
   }
 
   function route() {
@@ -935,6 +973,7 @@
     if (result.status === "none") { location.href = gh; return; }
     history.replaceState({ ...(history.state || {}), scroll: scrollY }, "");
     cameFromHome = true;
+    lastOpened = { owner, repo };
     location.hash = `#/p/${owner}/${repo}`;
   }
 
@@ -1003,7 +1042,7 @@
       renderStats(false);
       renderProjects();
     }
-    if (current) { renderProjectView(); renderReadme(); }
+    refreshProjectView();
     if (persist) {
       try { localStorage.setItem("lang", next); } catch { /* storage blocked */ }
     }

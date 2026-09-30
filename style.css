@@ -8,7 +8,7 @@
   --muted: #60606c;
   --accent: #4f46e5;
   --accent-2: #0891b2;
-  --vibe: #b45309;
+  --vibe: #92400e;
   --accent-text: #ffffff;
   --glow: rgba(79, 70, 229, .16);
   --shadow: 0 1px 2px rgba(20, 20, 40, .05), 0 8px 24px rgba(20, 20, 40, .06);
@@ -155,8 +155,8 @@ img, svg { display: block; max-width: 100%; }
 .icon-btn {
   display: grid;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
@@ -173,7 +173,7 @@ img, svg { display: block; max-width: 100%; }
   display: flex;
   align-items: center;
   gap: .15rem;
-  height: 2.5rem;
+  height: 2.75rem;
   padding: 0 .3rem;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -511,7 +511,8 @@ a.course-code:hover { text-decoration: underline; }
   .code-card { max-width: 30rem; }
 }
 
-@media (max-width: 48rem) {
+/* The header menu collapses earlier than the rest of the layout, so the full name always fits */
+@media (max-width: 56rem) {
   .menu-btn { display: grid; }
   .header-actions { margin-left: auto; }
   .site-nav {
@@ -529,7 +530,9 @@ a.course-code:hover { text-decoration: underline; }
   }
   .site-nav.open { display: flex; }
   .site-nav a { padding: .8rem .5rem; font-size: 1.05rem; }
+}
 
+@media (max-width: 48rem) {
   .hero { padding-top: 3.5rem; }
   .about-grid { grid-template-columns: 1fr; gap: 2rem; }
   .stats { grid-template-columns: repeat(2, 1fr); }
@@ -686,3 +689,7 @@ html { scrollbar-color: var(--border) var(--bg); }
 .legal strong, .legal em { color: var(--text); }
 html[data-lang="en"] [data-lang-block="no"],
 html[data-lang="no"] [data-lang-block="en"] { display: none; }
+
+/* ---------- Audit fixes ---------- */
+pre[tabindex]:focus-visible, .readme table:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pv-head h1:focus { outline: none; }

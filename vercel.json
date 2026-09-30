@@ -2,6 +2,10 @@
   "cleanUrls": true,
   "headers": [
     {
+      "source": "/(favicon.ico|icon-32.png|icon-192.png|apple-touch-icon.png|og-image.png)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },

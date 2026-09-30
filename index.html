@@ -9,13 +9,46 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Henning Trillhus – Computer Science Student &amp; Developer">
   <meta property="og:description" content="Web apps, games and side projects by a computer science student at the University of Oslo.">
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Henning Trillhus – Computer Science Student &amp; Developer">
+  <meta name="twitter:description" content="Web apps, games and side projects by a computer science student at the University of Oslo.">
+  <meta name="twitter:image" content="https://henningtrillhus.no/og-image.png">
+  <meta property="og:url" content="https://henningtrillhus.no/">
+  <meta property="og:site_name" content="Henning Trillhus">
+  <meta property="og:image" content="https://henningtrillhus.no/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Henning Trillhus, informatics student in Oslo who builds web apps and games">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="nb_NO">
+  <meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#09090c" media="(prefers-color-scheme: dark)">
+  <link rel="canonical" href="https://henningtrillhus.no/">
+  <link rel="preconnect" href="https://api.github.com">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
   <link rel="stylesheet" href="style.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Henning Trillhus",
+    "url": "https://henningtrillhus.no/",
+    "image": "https://henningtrillhus.no/icon-192.png",
+    "jobTitle": "Informatics student",
+    "affiliation": { "@type": "CollegeOrUniversity", "name": "University of Oslo" },
+    "address": { "@type": "PostalAddress", "addressLocality": "Oslo", "addressCountry": "NO" },
+    "knowsAbout": ["Web development", "Game development", "Python", "TypeScript", "JavaScript", "C#", "Svelte", "Unity"],
+    "sameAs": [
+      "https://github.com/HenningTrillhus",
+      "https://www.linkedin.com/in/henning-trillhus-253632396/"
+    ]
+  }
+  </script>
 
   <script>
     // Runs before first paint: pick theme + language and flag that JS is available.
@@ -108,7 +141,7 @@
 
         <figure class="code-card reveal" data-i18n-attr="aria-label:codeLabel" aria-label="A short summary of Henning as code">
           <div class="code-bar" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><em>henning.ts</em></div>
-<pre><code><span class="k">const</span> <span class="v">henning</span> <span class="p">=</span> <span class="p">{</span>
+<pre tabindex="0"><code><span class="k">const</span> <span class="v">henning</span> <span class="p">=</span> <span class="p">{</span>
   <span class="a">studies</span><span class="p">:</span> <span class="s">"Informatics (BSc)"</span><span class="p">,</span>
   <span class="a">focus</span><span class="p">:</span> <span class="s">"Programming &amp; Architecture"</span><span class="p">,</span>
   <span class="a">school</span><span class="p">:</span> <span class="s">"University of Oslo"</span><span class="p">,</span>
@@ -197,9 +230,7 @@
           <p class="muted" data-i18n-html="projectsSub">Everything I've built, with a clear split between what I coded myself and what I built with AI (vibe coding). Newest first, loaded live from my <a href="https://github.com/HenningTrillhus" target="_blank" rel="noopener">GitHub profile</a> plus older projects from my <a href="https://github.com/HenningT05" target="_blank" rel="noopener">earlier account</a>.</p>
         </header>
 
-        <div id="project-timeline" aria-live="polite">
-          <p class="muted" data-i18n="loading">Loading projects…</p>
-        </div>
+        <div id="project-timeline" aria-live="polite"></div>
         <noscript><p class="muted">Enable JavaScript to see my projects here / Slå på JavaScript for å se prosjektene mine her: <a href="https://github.com/HenningTrillhus">github.com/HenningTrillhus</a></p></noscript>
       </div>
     </section>
@@ -308,7 +339,7 @@
                 <input id="cf-consent" name="consent" type="checkbox" required>
                 <span data-i18n-html="formConsent">I agree that my name, email address and message are used to reply to me, and that they are handled as described in the <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>.</span>
               </label>
-              <input class="hp" type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true">
+              <input class="hp" type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true">
               <div class="form-actions field-wide">
                 <button class="btn primary" id="form-send" type="submit" data-i18n="formSend">Send message</button>
                 <p class="form-note" data-i18n="formNote">Sent by email through Web3Forms.</p>
@@ -331,7 +362,7 @@
     </div>
 
     <!-- PROJECT PAGE (README from GitHub), shown for #/p/owner/repo -->
-    <section id="project-view" class="section project-view" hidden>
+    <div id="project-view" class="section project-view" hidden>
       <div class="container">
         <a class="back-link" id="pv-back" href="#projects">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
@@ -340,7 +371,7 @@
         <header class="pv-head" id="pv-head"></header>
         <div class="readme" id="pv-readme" aria-live="polite"></div>
       </div>
-    </section>
+    </div>
   </main>
 
   <footer class="site-footer">
