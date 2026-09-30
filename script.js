@@ -148,8 +148,6 @@
       formNote: "Sent by email through Web3Forms.",
       formConsent: "I agree that my name, email address and message are used to reply to me, and that they are handled as described in the <a href=\"privacy.html\" target=\"_blank\" rel=\"noopener\">privacy policy</a>.",
       privacyLink: "Privacy policy",
-      viewCode: "View code",
-      hideCode: "Hide code",
       codeTitle: "Code",
       codeFiles: "Files",
       codeLoading: "Loading code…",
@@ -159,6 +157,8 @@
       codeCopy: "Copy code",
       codeCopied: "Copied!",
       codeOpenFile: "Open file on GitHub ↗",
+      viewReadme: "README",
+      viewSwitch: "Switch between README and code",
       liveDemo: "Live demo ↗", code: "Code", project: "Project",
       descLang: "A {lang} project.", descGeneric: "A personal project.",
       skillsKicker: "03 / Skills", skillsTitle: "What I work with",
@@ -251,8 +251,6 @@
       formNote: "Sendes som e-post via Web3Forms.",
       formConsent: "Jeg samtykker til at navn, e-postadresse og melding brukes til å svare meg, og at de behandles slik det står i <a href=\"privacy.html\" target=\"_blank\" rel=\"noopener\">personvernerklæringen</a>.",
       privacyLink: "Personvernerklæring",
-      viewCode: "Vis koden",
-      hideCode: "Skjul koden",
       codeTitle: "Kode",
       codeFiles: "Filer",
       codeLoading: "Laster koden…",
@@ -262,6 +260,8 @@
       codeCopy: "Kopier koden",
       codeCopied: "Kopiert!",
       codeOpenFile: "Åpne filen på GitHub ↗",
+      viewReadme: "README",
+      viewSwitch: "Bytt mellom README og kode",
       liveDemo: "Live-demo ↗", code: "Kode", project: "Prosjekt",
       descLang: "Et {lang}-prosjekt.", descGeneric: "Et personlig prosjekt.",
       skillsKicker: "03 / Ferdigheter", skillsTitle: "Det jeg jobber med",
@@ -751,6 +751,7 @@
   const pvReadme = $("#pv-readme");
   const pvBack = $("#pv-back");
   const pvCode = $("#pv-code");
+  const pvSwitch = $("#pv-switch");
   const readmeCache = new Map();
   let current = null;
   let cameFromHome = false;
@@ -914,8 +915,8 @@
   function renderReadme() {
     if (!current || !current.readme) return;
     const { owner, repo, readme } = current;
+    if (!current.hasReadme) { pvReadme.replaceChildren(); return; } // no README, or an empty one
     const ghUrl = githubUrlFor(owner, repo);
-    if (readme.status === "none") { pvReadme.replaceChildren(); return; }
     if (readme.status === "ok") {
       pvReadme.replaceChildren(
         sanitizeReadme(readme.html, owner, repo),
@@ -929,6 +930,13 @@
           el("a", { className: "btn primary", href: ghUrl, target: "_blank", rel: "noopener" }, t("pvGitHub")),
           retry)));
     }
+  }
+
+  // A README that exists but has nothing in it counts as no README at all.
+  function readmeIsEmpty(result) {
+    if (result.status !== "ok") return false;
+    const doc = new DOMParser().parseFromString(result.html, "text/html");
+    return !doc.body.textContent.trim() && !doc.body.querySelector("img");
   }
 
   /* ---------- Code viewer: source code on the project page (only for CODE_VIEWER_REPOS) ---------- */
@@ -1040,50 +1048,36 @@
   const formatSize = (bytes) => (bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(bytes < 10240 ? 1 : 0)} KB`);
 
   function renderCodePanel() {
-    if (!current || !current.code) return;
     const token = current;
-    const { owner, repo, code } = token;
+    if (!token || !token.hasCode) { pvCode.replaceChildren(); return; }
+    const file = token.code.files.find((f) => f.name === token.codeFile) || token.code.files[0];
+    const content = [el("h2", { className: "sr-only" }, t("codeTitle"))];
 
-    if (code.status !== "ok" || !code.files.length) {
-      pvCode.hidden = false;
-      pvCode.replaceChildren(el("div", { className: "readme-error" },
-        el("p", {}, t("codeError")),
-        el("a", { className: "btn primary", href: githubUrlFor(owner, repo), target: "_blank", rel: "noopener" }, t("pvGitHub"))));
-      return;
-    }
-
-    const file = code.files.find((f) => f.name === token.codeFile) || code.files[0];
-    const toggle = el("button", { className: "btn", type: "button" }, t(token.codeOpen ? "hideCode" : "viewCode"));
-    toggle.setAttribute("aria-expanded", String(token.codeOpen));
-    toggle.setAttribute("aria-controls", "code-body");
-    toggle.addEventListener("click", () => {
-      token.codeOpen = !token.codeOpen;
-      renderCodePanel();
-      loadSelectedFile();
-    });
-
-    const body = el("div", { className: "code-body", id: "code-body" });
-    body.hidden = !token.codeOpen;
-
-    if (code.files.length > 1) {
+    if (token.code.files.length > 1) {
       const tabs = el("div", { className: "code-tabs" });
       tabs.setAttribute("role", "group");
       tabs.setAttribute("aria-label", t("codeFiles"));
-      code.files.forEach((f) => {
+      token.code.files.forEach((f) => {
         const tab = el("button", { className: "code-tab", type: "button" }, f.name);
         tab.setAttribute("aria-pressed", String(f === file));
-        tab.addEventListener("click", () => { token.codeFile = f.name; renderCodePanel(); loadSelectedFile(); });
+        tab.addEventListener("click", () => {
+          token.codeFile = f.name;
+          renderCodePanel();
+          const pressed = pvCode.querySelector('.code-tab[aria-pressed="true"]');
+          if (pressed) pressed.focus({ preventScroll: true });
+          loadSelectedFile();
+        });
         tabs.append(tab);
       });
-      body.append(tabs);
+      content.push(tabs);
     }
 
     if (file.tooLarge) {
-      body.append(el("p", { className: "muted" }, t("codeTooLarge")));
+      content.push(el("p", { className: "muted" }, t("codeTooLarge")));
     } else if (file.failed) {
-      body.append(el("p", { className: "muted" }, t("codeError")));
+      content.push(el("p", { className: "muted" }, t("codeError")));
     } else if (file.text === undefined) {
-      body.append(el("p", { className: "muted" }, t("codeLoading")));
+      content.push(el("p", { className: "muted" }, t("codeLoading")));
     } else {
       const ext = (file.name.split(".").pop() || "").toLowerCase();
       const lineCount = file.text.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n").length;
@@ -1106,16 +1100,15 @@
       const codeEl = el("code", {});
       codeEl.append(buildCode(file.text, LANG_OF_EXT[ext]));
       pre.append(codeEl);
-      body.append(meta, pre);
+      content.push(meta, pre);
     }
 
-    pvCode.hidden = false;
-    pvCode.replaceChildren(el("div", { className: "code-head" }, el("h2", {}, t("codeTitle")), toggle), body);
+    pvCode.replaceChildren(...content);
   }
 
   async function loadSelectedFile() {
     const token = current;
-    if (!token || !token.code || token.code.status !== "ok" || !token.codeOpen) return;
+    if (!token || !token.hasCode || token.view !== "code") return;
     const file = token.code.files.find((f) => f.name === token.codeFile);
     if (!file || file.text !== undefined || file.failed || file.tooLarge) return;
     if (file.size > MAX_FILE_BYTES) {
@@ -1130,31 +1123,70 @@
         file.failed = true;
       }
     }
-    if (current === token) renderCodePanel();
-  }
-
-  async function loadCode(token) {
-    pvCode.hidden = false;
-    pvCode.replaceChildren(el("p", { className: "muted" }, t("codeLoading")));
-    token.code = await getCodeFiles(token.owner, token.repo);
-    if (current !== token) return;
-    if (token.code.status === "ok" && token.code.files.length) {
-      const files = token.code.files;
-      token.codeFile = (files.find((f) => /^(index\.html|main\.py)$/i.test(f.name)) || files[0]).name;
-      // Open straight away when there is nothing else to read (no README) or only a single file.
-      token.codeOpen = !token.readme || token.readme.status !== "ok" || files.length === 1;
+    if (current === token) {
+      const hadFocus = pvCode.contains(document.activeElement);
+      renderCodePanel();
+      if (hadFocus) {
+        const pressed = pvCode.querySelector('.code-tab[aria-pressed="true"]');
+        if (pressed) pressed.focus({ preventScroll: true });
+      }
     }
-    renderCodePanel();
-    loadSelectedFile();
   }
 
-  // Re-draws the project page (heading, tags and README) after a language switch or fresh project data.
+  /* ---------- README / Code switch ---------- */
+  const CODE_ENTRY = /^(index\.html|main\.py)$/i;
+
+  // Shows either the README or the code, never both.
+  function applyView() {
+    const token = current;
+    if (!token || !token.decided) return;
+    const showCode = token.view === "code";
+    pvReadme.hidden = showCode;
+    pvCode.hidden = !showCode;
+  }
+
+  // Two buttons, but only when there is both a README and code to switch between.
+  function renderSwitch() {
+    const token = current;
+    const both = !!token && token.hasReadme && token.hasCode;
+    pvSwitch.hidden = !both;
+    if (!both) { pvSwitch.replaceChildren(); return; }
+    pvSwitch.setAttribute("role", "group");
+    pvSwitch.setAttribute("aria-label", t("viewSwitch"));
+    const buttons = [["readme", "viewReadme"], ["code", "codeTitle"]].map(([view, key]) => {
+      const button = el("button", { className: "view-btn", type: "button" }, t(key));
+      button.setAttribute("aria-pressed", String(token.view === view));
+      button.addEventListener("click", () => {
+        token.view = view;
+        buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+        applyView();
+        if (view === "code") loadSelectedFile();
+      });
+      return button;
+    });
+    pvSwitch.replaceChildren(...buttons);
+  }
+
+  function renderPane() {
+    if (!current || !current.decided) return;
+    renderReadme();
+    renderCodePanel();
+    renderSwitch();
+    applyView();
+  }
+
+  // Re-draws the project page (heading, tags, README and code) after a language switch or fresh project data.
   function refreshProjectView() {
     if (!current) return;
     renderProjectView();
-    if (current.readme) renderReadme();
-    else pvReadme.replaceChildren(el("p", { className: "muted" }, t("pvLoading")));
-    renderCodePanel();
+    if (current.decided) {
+      renderPane();
+    } else {
+      pvSwitch.hidden = true;
+      pvCode.hidden = true;
+      pvReadme.hidden = false;
+      pvReadme.replaceChildren(el("p", { className: "muted" }, t("pvLoading")));
+    }
   }
 
   async function showProject(owner, repo) {
@@ -1169,9 +1201,9 @@
       setMenu(false);
       scrollTo({ top: 0, behavior: "instant" });
     }
-    const token = { owner, repo, readme: null, code: null, codeOpen: false, codeFile: null };
+    const token = { owner, repo, readme: null, code: null, decided: false, hasReadme: false, hasCode: false, view: "readme", codeFile: null };
     current = token;
-    pvCode.hidden = true;
+    pvSwitch.replaceChildren(); // clear what the previous project left behind
     pvCode.replaceChildren();
     refreshProjectView();
     const heading = pvHead.querySelector("h1");
@@ -1179,15 +1211,25 @@
 
     const result = await getReadme(owner, repo);
     if (current !== token) return;
-    if (result.status === "none" && !isCodeRepo(repo)) {
-      // No README: skip our page and go straight to the repository on GitHub.
+    let code = null;
+    if (isCodeRepo(repo)) {
+      code = await getCodeFiles(owner, repo);
+      if (current !== token) return;
+    }
+
+    const hasCode = !!code && code.status === "ok" && code.files.length > 0;
+    const hasReadme = result.status === "error" || (result.status === "ok" && !readmeIsEmpty(result));
+    if (!hasReadme && !hasCode) {
+      // Neither a README nor any code to show: go straight to the repository on GitHub.
       history.replaceState(null, "", location.pathname + location.search);
       location.replace(githubUrlFor(owner, repo));
       return;
     }
-    token.readme = result;
-    renderReadme();
-    if (isCodeRepo(repo)) loadCode(token);
+
+    Object.assign(token, { readme: result, code, hasReadme, hasCode, decided: true, view: hasReadme ? "readme" : "code" });
+    if (hasCode) token.codeFile = (code.files.find((f) => CODE_ENTRY.test(f.name)) || code.files[0]).name;
+    renderPane();
+    if (token.view === "code") loadSelectedFile();
   }
 
   function showHome() {
@@ -1220,8 +1262,14 @@
     if (cardEl && cardEl.classList.contains("busy")) return;
     if (cardEl) cardEl.classList.add("busy");
     const result = await getReadme(owner, repo);
+    // Something to show = a README with content, or (for the code-viewer projects) code files.
+    let viewable = result.status !== "none" && !readmeIsEmpty(result);
+    if (!viewable && isCodeRepo(repo)) {
+      const code = await getCodeFiles(owner, repo);
+      viewable = code.status === "ok" && code.files.length > 0;
+    }
     if (cardEl) cardEl.classList.remove("busy");
-    if (result.status === "none" && !isCodeRepo(repo)) { location.href = gh; return; }
+    if (!viewable) { location.href = gh; return; }
     history.replaceState({ ...(history.state || {}), scroll: scrollY }, "");
     cameFromHome = true;
     lastOpened = { owner, repo };

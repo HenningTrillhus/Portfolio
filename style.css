@@ -757,3 +757,12 @@ pre[tabindex]:focus-visible, .readme table:focus-visible { outline: 2px solid va
 .t-f { color: #7dd3fc; }
 .t-a { color: #93c5fd; }
 @media print { .codeview { display: none !important; } }
+
+/* ---------- README / Code switch ---------- */
+.view-switch { display: inline-flex; gap: .25rem; padding: .25rem; margin-bottom: 1.75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.view-btn { min-height: 2.75rem; padding: .55rem 1.3rem; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font: 600 .95rem var(--font); cursor: pointer; transition: background-color .15s, color .15s; }
+.view-btn:hover { color: var(--text); }
+.view-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
+.codeview { margin-top: 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+@media print { .view-switch { display: none !important; } }
