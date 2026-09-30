@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>404 – Page not found · Henning Trillhus</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234f46e5'/%3E%3Cpath d='M20 16v32M44 16v32M20 32h24' stroke='white' stroke-width='6' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+  
 
   <!-- Self-contained on purpose: GitHub Pages serves this file for any unknown path,
        so relative links to style.css or script.js would break on nested URLs. -->
@@ -102,6 +102,14 @@
       }
       document.getElementById("home").href = base;
       document.getElementById("projects").href = base + "#projects";
+
+      [["icon", "favicon.ico", "any"], ["icon", "icon-32.png", "32x32"], ["apple-touch-icon", "apple-touch-icon.png", ""]].forEach(function (i) {
+        var link = document.createElement("link");
+        link.rel = i[0];
+        link.href = base + i[1];
+        if (i[2]) link.setAttribute("sizes", i[2]);
+        document.head.appendChild(link);
+      });
 
       var shown = location.pathname.replace(base === "/" ? /^\/+/ : new RegExp("^" + base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), "") || "this-page";
       document.getElementById("path").textContent = "/" + shown.replace(/^\/+/, "");

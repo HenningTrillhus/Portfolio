@@ -32,6 +32,7 @@ Plain **HTML, CSS and JavaScript**. There is no build step, framework or package
 ├── legal.js      # Language and theme switch for the privacy page
 ├── 404.html      # Self-contained "page not found" page
 ├── vercel.json   # Clean URLs and security headers for Vercel
+├── favicon.ico, icon-32.png, icon-192.png, apple-touch-icon.png   # Site icons
 └── README.md
 ```
 
