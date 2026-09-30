@@ -7,19 +7,23 @@
   // While it is empty the contact form stays hidden.
   const WEB3FORMS_ACCESS_KEY = "ac9406cd-dd6a-4889-b7ca-eab4f9b43ee6";
   // Repos to leave out of the list (by name).
-  const HIDDEN_REPOS = ["Portfolio"];
+  const HIDDEN_REPOS = ["Portfolio", "My-Munch"];
   // How each project was made. Repos in neither list end up under "More projects".
   const HAND_CODED = ["first-project", "Deepvein", "3D-Shooter", "Zeptrico", "UnityRPG", "Game-Of-Life-Conway"];
-  const VIBE_CODED = ["Kollokvie-IFI", "My-Munch", "Min-Munch", "Leilighet-Designer-"];
+  const VIBE_CODED = ["Kollokvie-IFI", "duolist", "Min-Munch", "Leilighet-Designer-"];
+  // Live sites for projects that have no website set on GitHub (by repo name). Optional.
+  const LIVE_URLS = {
+    "Leilighet-Designer-": "https://henningtrillhus.github.io/Leilighet-Designer-/", // hosted on GitHub Pages
+  };
   // Nicer descriptions than the ones on GitHub, in both languages (by repo name). Optional.
   const DESCRIPTIONS = {
     "Kollokvie-IFI": {
       en: "Web app for organising study groups (kollokvier) at the Department of Informatics.",
       no: "Nettapp for å organisere kollokvier ved Institutt for informatikk.",
     },
-    "My-Munch": {
-      en: "A social platform where people can share food recipes.",
-      no: "En sosial plattform der folk kan dele matoppskrifter.",
+    "duolist": {
+      en: "A shared shopping list and dinner planner for two, with realtime sync and push notifications.",
+      no: "En delt handleliste og middagsplanlegger for to, med sanntidssynk og push-varsler.",
     },
     "Min-Munch": {
       en: "A digital recipe book for saving and organising my own recipes.",
@@ -295,7 +299,7 @@
   // Used only if GitHub can't be reached and nothing is cached.
   const FALLBACK_REPOS = [
     { name: "Kollokvie-IFI", language: "TypeScript", homepage: "https://kollokvie-ifi.vercel.app", created_at: "2026-09-18T00:00:00Z" },
-    { name: "My-Munch", language: "TypeScript", homepage: "https://my-munch.vercel.app", created_at: "2026-08-20T00:00:00Z" },
+    { name: "duolist", language: "TypeScript", homepage: "https://duolist-alpha.vercel.app", created_at: "2026-08-08T00:00:00Z" },
     { name: "Zeptrico", language: "ShaderLab", homepage: "", created_at: "2026-06-10T00:00:00Z" },
     { name: "Deepvein", language: "C#", homepage: "", created_at: "2026-09-29T00:00:00Z" },
     { name: "3D-Shooter", language: "ShaderLab", homepage: "", created_at: "2026-09-22T00:00:00Z" },
@@ -548,7 +552,7 @@
         html_url: safeUrl(r.html_url) || `https://github.com/${GITHUB_USER}/${encodeURIComponent(r.name)}`,
         rawDescription: (r.description || "").trim(),
         language: r.language || null,
-        homepage: safeUrl(r.homepage),
+        homepage: safeUrl(LIVE_URLS[r.name] || r.homepage),
         created: r.created_at || r.pushed_at,
         stars: r.stargazers_count || 0,
         made: VIBE_CODED.includes(r.name) ? "vibe" : HAND_CODED.includes(r.name) ? "hand" : "other",
@@ -910,7 +914,7 @@
   }
 
   async function showProject(owner, repo) {
-    if (!ALLOWED_OWNERS.includes(owner.toLowerCase())) {
+    if (!ALLOWED_OWNERS.includes(owner.toLowerCase()) || HIDDEN_REPOS.includes(repo)) {
       history.replaceState(null, "", location.pathname + location.search);
       showHome();
       return;
