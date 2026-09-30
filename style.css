@@ -766,3 +766,8 @@ pre[tabindex]:focus-visible, .readme table:focus-visible { outline: 2px solid va
 .codeview { margin-top: 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 @media print { .view-switch { display: none !important; } }
+
+/* ---------- File picker for projects with folders ---------- */
+.file-nav { display: grid; gap: .9rem; margin-bottom: .9rem; }
+.file-nav .code-tabs { margin-bottom: 0; }
+.file-dir { margin: 0 0 .4rem; font: 500 .8rem var(--mono); color: var(--muted); overflow-wrap: anywhere; }

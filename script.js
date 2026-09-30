@@ -12,7 +12,7 @@
   const HAND_CODED = ["first-project", "Deepvein", "3D-Shooter", "Zeptrico", "UnityRPG", "Game-Of-Life-Conway"];
   const VIBE_CODED = ["Kollokvie-IFI", "duolist", "Min-Munch", "Leilighet-Designer-"];
   // Small projects whose source code can be read on their project page (by repo name).
-  const CODE_VIEWER_REPOS = ["Leilighet-Designer-", "Game-Of-Life-Conway"];
+  const CODE_VIEWER_REPOS = ["Leilighet-Designer-", "Game-Of-Life-Conway", "MatchMetrix", "TheChatHive"];
   // Live sites for projects that have no website set on GitHub (by repo name). Optional.
   const LIVE_URLS = {
     "Leilighet-Designer-": "https://henningtrillhus.github.io/Leilighet-Designer-/", // hosted on GitHub Pages
@@ -932,16 +932,21 @@
     }
   }
 
-  // A README that exists but has nothing in it counts as no README at all.
+  // A README with nothing in it, or an unedited template README that says nothing about the project, counts as no README.
+  const TEMPLATE_README = /Everything you need to build a Svelte project|This template provides a minimal setup to get React working in Vite/;
   function readmeIsEmpty(result) {
     if (result.status !== "ok") return false;
     const doc = new DOMParser().parseFromString(result.html, "text/html");
-    return !doc.body.textContent.trim() && !doc.body.querySelector("img");
+    const text = doc.body.textContent.trim();
+    if (!text && !doc.body.querySelector("img")) return true;
+    return TEMPLATE_README.test(text);
   }
 
   /* ---------- Code viewer: source code on the project page (only for CODE_VIEWER_REPOS) ---------- */
   const isCodeRepo = (repo) => CODE_VIEWER_REPOS.includes(repo);
-  const CODE_FILE = /\.(py|js|mjs|cjs|ts|tsx|jsx|html?|css|json|txt|sh|cs)$/i;
+  const CODE_FILE = /\.(py|js|mjs|cjs|ts|tsx|jsx|html?|css|svelte|json|txt|sh|cs)$/i;
+  const SKIP_PATH = /(^|\/)(\.[^/]*|node_modules|dist|build)(\/|$)|(^|\/)(package-lock\.json|yarn\.lock|pnpm-lock\.yaml)$/i;
+  const MAX_FILES = 60;
   const MAX_FILE_BYTES = 300 * 1024;
   const MAX_LINES = 4000;
   const codeCache = new Map();
@@ -966,13 +971,14 @@
       classify: (m) => (m[1] ? "c" : m[2] ? "s" : m[3] ? "k" : m[4] ? "n" : "a"),
     },
     html: {
-      re: /(<!--[\s\S]*?-->)|(<\/?[A-Za-z][\w:-]*)|([A-Za-z_:][\w:.-]*)(\s*=\s*)("[^"]*"|'[^']*')|(\/?>)/g,
-      classify: (m) => (m[1] ? "c" : m[2] ? "f" : m[3] ? [["a", m[3]], ["", m[4]], ["s", m[5]]] : ""),
+      re: /(<!--[\s\S]*?-->)|(<\/?[A-Za-z][\w:-]*)|([A-Za-z_:][\w:.-]*)(\s*=\s*)("[^"]*"|'[^']*')|(\/?>)|(\{[#:\/@][^}]*\})/g,
+      classify: (m) => (m[1] ? "c" : m[2] ? "f" : m[3] ? [["a", m[3]], ["", m[4]], ["s", m[5]]] : m[7] ? "k" : ""),
     },
   };
-  const LANG_OF_EXT = { py: "py", js: "js", mjs: "js", cjs: "js", css: "css", html: "html", htm: "html" };
+  const LANG_OF_EXT = { py: "py", js: "js", mjs: "js", cjs: "js", ts: "js", tsx: "js", jsx: "js", css: "css", html: "html", htm: "html", svelte: "svelte" };
 
   function tokenize(text, lang) {
+    if (lang === "svelte") return tokenizeSvelte(text);
     const rules = TOKEN_RULES[lang];
     if (!rules) return [["", text]];
     const out = [];
@@ -988,6 +994,22 @@
       last = m.index + m[0].length;
     }
     if (last < text.length) out.push(["", text.slice(last)]);
+    return out;
+  }
+
+  // A .svelte file is HTML with a <script> (JavaScript) and a <style> (CSS) block: each part gets its own highlighter.
+  function tokenizeSvelte(text) {
+    const out = [];
+    const blocks = /(<script[^>]*>)([\s\S]*?)(<\/script>)|(<style[^>]*>)([\s\S]*?)(<\/style>)/g;
+    let last = 0;
+    let m;
+    while ((m = blocks.exec(text))) {
+      if (m.index > last) out.push(...tokenize(text.slice(last, m.index), "html"));
+      const [open, inner, close, lang] = m[1] ? [m[1], m[2], m[3], "js"] : [m[4], m[5], m[6], "css"];
+      out.push(...tokenize(open, "html"), ...tokenize(inner, lang), ...tokenize(close, "html"));
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) out.push(...tokenize(text.slice(last), "html"));
     return out;
   }
 
@@ -1009,19 +1031,45 @@
     return lines;
   }
 
+  // Lists the readable source files of a repository (all folders), using one call to the Git tree API.
   async function getCodeFiles(owner, repo) {
     const key = `${owner}/${repo}`.toLowerCase();
     if (codeCache.has(key)) return codeCache.get(key);
     try {
-      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, {
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/HEAD?recursive=1`, {
         headers: { Accept: "application/vnd.github+json" },
       });
       if (!res.ok) return { status: "error" };
-      const items = await res.json();
-      const files = (Array.isArray(items) ? items : [])
-        .filter((i) => i.type === "file" && CODE_FILE.test(i.name) && !/^readme/i.test(i.name) && safeUrl(i.download_url))
-        .map((i) => ({ name: i.name, size: i.size, url: safeUrl(i.download_url), page: safeUrl(i.html_url) }));
-      const result = { status: "ok", files };
+      const data = await res.json();
+      const picked = (Array.isArray(data.tree) ? data.tree : []).filter((n) =>
+        n.type === "blob" && CODE_FILE.test(n.path) && !SKIP_PATH.test(n.path) && !/(^|\/)readme[^/]*$/i.test(n.path));
+
+      // Folders every file shares (for example "MatchMetrics/") are left out of the displayed paths.
+      const dirs = picked.map((n) => n.path.split("/").slice(0, -1));
+      let common = dirs.length ? dirs[0] : [];
+      dirs.forEach((d) => { let i = 0; while (i < common.length && i < d.length && common[i] === d[i]) i += 1; common = common.slice(0, i); });
+
+      const files = picked.map((n) => {
+        const parts = n.path.split("/");
+        const rel = parts.slice(common.length);
+        const encoded = parts.map(encodeURIComponent).join("/");
+        return {
+          name: rel[rel.length - 1],
+          rel: rel.join("/"),
+          dir: rel.slice(0, -1).join("/"),
+          path: n.path,
+          size: n.size || 0,
+          url: `https://raw.githubusercontent.com/${owner}/${repo}/HEAD/${encoded}`,
+          page: `https://github.com/${owner}/${repo}/blob/HEAD/${encoded}`,
+        };
+      }).sort((a, b) => {
+        if (a.dir === b.dir) return a.name.localeCompare(b.name);
+        if (!a.dir) return -1; // files in the top folder first
+        if (!b.dir) return 1;
+        return a.dir.localeCompare(b.dir);
+      }).slice(0, MAX_FILES);
+
+      const result = { status: "ok", files, flat: files.every((f) => !f.dir) };
       codeCache.set(key, result);
       return result;
     } catch {
@@ -1047,30 +1095,50 @@
 
   const formatSize = (bytes) => (bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(bytes < 10240 ? 1 : 0)} KB`);
 
+  // The file picker: one row of buttons for small flat projects, buttons grouped under their folder for bigger ones.
+  function fileNav(token, file) {
+    const pick = (f) => {
+      token.codeFile = f.path;
+      renderCodePanel();
+      const pressed = pvCode.querySelector('.code-tab[aria-pressed="true"]');
+      if (pressed) pressed.focus({ preventScroll: true });
+      loadSelectedFile();
+    };
+    const button = (f) => {
+      const b = el("button", { className: "code-tab", type: "button" }, f.name);
+      b.setAttribute("aria-pressed", String(f === file));
+      b.setAttribute("aria-label", f.rel);
+      b.addEventListener("click", () => pick(f));
+      return b;
+    };
+
+    const nav = el("div", { className: "file-nav" });
+    nav.setAttribute("role", "group");
+    nav.setAttribute("aria-label", t("codeFiles"));
+    if (token.code.flat) {
+      nav.append(el("div", { className: "code-tabs" }, ...token.code.files.map(button)));
+      return nav;
+    }
+    const groups = new Map();
+    token.code.files.forEach((f) => {
+      if (!groups.has(f.dir)) groups.set(f.dir, []);
+      groups.get(f.dir).push(f);
+    });
+    groups.forEach((list, dir) => {
+      const group = el("div", { className: "file-group" });
+      if (dir) group.append(el("p", { className: "file-dir" }, `${dir}/`));
+      group.append(el("div", { className: "code-tabs" }, ...list.map(button)));
+      nav.append(group);
+    });
+    return nav;
+  }
+
   function renderCodePanel() {
     const token = current;
     if (!token || !token.hasCode) { pvCode.replaceChildren(); return; }
-    const file = token.code.files.find((f) => f.name === token.codeFile) || token.code.files[0];
+    const file = token.code.files.find((f) => f.path === token.codeFile) || token.code.files[0];
     const content = [el("h2", { className: "sr-only" }, t("codeTitle"))];
-
-    if (token.code.files.length > 1) {
-      const tabs = el("div", { className: "code-tabs" });
-      tabs.setAttribute("role", "group");
-      tabs.setAttribute("aria-label", t("codeFiles"));
-      token.code.files.forEach((f) => {
-        const tab = el("button", { className: "code-tab", type: "button" }, f.name);
-        tab.setAttribute("aria-pressed", String(f === file));
-        tab.addEventListener("click", () => {
-          token.codeFile = f.name;
-          renderCodePanel();
-          const pressed = pvCode.querySelector('.code-tab[aria-pressed="true"]');
-          if (pressed) pressed.focus({ preventScroll: true });
-          loadSelectedFile();
-        });
-        tabs.append(tab);
-      });
-      content.push(tabs);
-    }
+    if (token.code.files.length > 1) content.push(fileNav(token, file));
 
     if (file.tooLarge) {
       content.push(el("p", { className: "muted" }, t("codeTooLarge")));
@@ -1088,7 +1156,7 @@
         setTimeout(() => { copyBtn.textContent = t("codeCopy"); }, 2000);
       });
       const meta = el("div", { className: "code-meta" },
-        el("span", {}, file.name),
+        el("span", {}, file.rel),
         el("span", {}, t("codeMeta", { lines: lineCount, size: formatSize(file.size) })),
         el("span", { className: "code-spacer" }),
         copyBtn,
@@ -1096,7 +1164,7 @@
       const pre = el("pre", { className: "code-pre" });
       pre.tabIndex = 0; // scrollable, so it must be reachable with the keyboard
       pre.setAttribute("role", "group");
-      pre.setAttribute("aria-label", file.name);
+      pre.setAttribute("aria-label", file.rel);
       const codeEl = el("code", {});
       codeEl.append(buildCode(file.text, LANG_OF_EXT[ext]));
       pre.append(codeEl);
@@ -1109,7 +1177,7 @@
   async function loadSelectedFile() {
     const token = current;
     if (!token || !token.hasCode || token.view !== "code") return;
-    const file = token.code.files.find((f) => f.name === token.codeFile);
+    const file = token.code.files.find((f) => f.path === token.codeFile);
     if (!file || file.text !== undefined || file.failed || file.tooLarge) return;
     if (file.size > MAX_FILE_BYTES) {
       file.tooLarge = true;
@@ -1134,7 +1202,9 @@
   }
 
   /* ---------- README / Code switch ---------- */
-  const CODE_ENTRY = /^(index\.html|main\.py)$/i;
+  // The file that opens first: a typical entry point if there is one, otherwise the first file.
+  const ENTRY_FILES = ["src/routes/+page.svelte", "src/App.svelte", "index.html", "main.py", "src/main.js"];
+  const pickEntry = (files) => ENTRY_FILES.map((rel) => files.find((f) => f.rel === rel)).find(Boolean) || files[0];
 
   // Shows either the README or the code, never both.
   function applyView() {
@@ -1227,7 +1297,7 @@
     }
 
     Object.assign(token, { readme: result, code, hasReadme, hasCode, decided: true, view: hasReadme ? "readme" : "code" });
-    if (hasCode) token.codeFile = (code.files.find((f) => CODE_ENTRY.test(f.name)) || code.files[0]).name;
+    if (hasCode) token.codeFile = pickEntry(code.files).path;
     renderPane();
     if (token.view === "code") loadSelectedFile();
   }
