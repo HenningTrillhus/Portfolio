@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy policy – Henning Trillhus</title>
+  <meta name="description" content="Privacy policy for henningtrillhus.no: what personal data is processed, why, and your rights.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234f46e5'/%3E%3Cpath d='M20 16v32M44 16v32M20 32h24' stroke='white' stroke-width='6' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+    // Runs before first paint: pick theme + language.
+    (function () {
+      var root = document.documentElement, theme = null, lang = null;
+      try { theme = localStorage.getItem("theme"); lang = localStorage.getItem("lang"); } catch (e) {}
+      if (theme !== "light" && theme !== "dark") theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      root.dataset.theme = theme;
+      if (lang !== "en" && lang !== "no") {
+        var pref = (navigator.languages && navigator.languages[0]) || navigator.language || "en";
+        lang = /^(nb|nn|no)\b/i.test(pref) ? "no" : "en";
+      }
+      root.dataset.lang = lang;
+      root.lang = lang === "no" ? "nb" : "en";
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-header legal-header">
+    <div class="header-inner">
+      <a class="brand" href="./" aria-label="Henning Trillhus, portfolio">
+        <span class="brand-mark" aria-hidden="true">H</span>
+        <span class="brand-name">Henning Trillhus</span>
+      </a>
+      <div class="header-actions">
+        <button class="lang-btn" id="lang-toggle" type="button" aria-label="Bytt til norsk">
+          <span data-l="en" lang="en">EN</span><span data-l="no" lang="nb">NO</span>
+        </button>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch colour theme">
+          <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="container legal">
+
+    <!-- ===================== ENGLISH ===================== -->
+    <article data-lang-block="en" lang="en">
+      <a class="back-link" href="./">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        Back to the portfolio
+      </a>
+      <h1>Privacy policy</h1>
+      <p class="updated">Last updated: 30 September 2026</p>
+
+      <p>This website is my personal portfolio. I take your privacy seriously and process as little personal data as possible. This page explains what is processed, why, and what rights you have.</p>
+
+      <h2>1. Who is responsible</h2>
+      <p>The data controller is <strong>Henning Trillhus</strong> (private individual, Norway). You can reach me at <a href="mailto:henningtrillhus05@gmail.com">henningtrillhus05@gmail.com</a>. The website is <strong>henningtrillhus.no</strong>.</p>
+
+      <h2>2. The short version</h2>
+      <ul>
+        <li>No cookies, no advertising, no analytics or tracking tools, and no profiling.</li>
+        <li>Fonts, styles and scripts are served from this website, not from third parties.</li>
+        <li>Personal data is only processed (a) if you send me a message, and (b) in the limited way described below when your browser loads the website and my project information.</li>
+      </ul>
+
+      <h2>3. What I process, and why</h2>
+
+      <h3>Contact form</h3>
+      <p><strong>Data:</strong> the name, email address and message you type, and your consent tick. The form service may also process technical data such as your IP address to deliver the message and to prevent spam.</p>
+      <p><strong>Purpose:</strong> to read and reply to your message, for example about an internship, a job or a project.</p>
+      <p><strong>Legal basis:</strong> your consent (GDPR Article 6(1)(a)), which you give by ticking the box and sending the form. You can withdraw your consent at any time by emailing me. Withdrawing does not affect processing that happened before.</p>
+      <p><strong>Retention:</strong> I delete messages no later than 12 months after our last contact, unless a longer period is needed, for example during an ongoing recruitment process or because the law requires it. The form service Web3Forms keeps a copy of submissions for up to three years (or less, depending on the plan). If you ask, I will delete your submission there as well.</p>
+
+      <h3>Email</h3>
+      <p>If you email me directly, I process your email address, name and message to answer you. The legal basis is my legitimate interest in answering enquiries (Article 6(1)(f)). Retention is the same as for the contact form.</p>
+
+      <h3>Visiting the website (hosting)</h3>
+      <p>The website is hosted by Vercel Inc. Like any web host, Vercel processes technical data when you load a page, such as your IP address, the page you requested, browser and device information and the time. This is needed to deliver the website securely and to prevent abuse. The legal basis is my legitimate interest in running a secure website (Article 6(1)(f)). I do not use this data to identify individual visitors.</p>
+
+      <h3>Project information from GitHub</h3>
+      <p>The list of projects, the project pages and the README texts are loaded from GitHub directly by your browser. GitHub therefore receives your IP address and technical data, in the same way as when you visit github.com. Some README files contain images hosted elsewhere (for example badges or screenshots), and those servers also receive your IP address when the image loads. The legal basis is my legitimate interest in presenting my work (Article 6(1)(f)).</p>
+
+      <h3>Links to other websites</h3>
+      <p>Links to GitHub, LinkedIn, live demos and other sites take you away from this website. Their own privacy policies apply from then on, and I am not responsible for them.</p>
+
+      <h2>4. Storage in your browser</h2>
+      <p>The website saves a few things in your browser's local storage: your chosen colour theme, your chosen language, a temporary copy of the GitHub project data (up to one hour) and README pages you opened (until you close the tab). This information stays on your device and is not sent to me. It is only used to make the website work the way you asked, never for tracking. Because it is purely functional, I do not use a cookie banner. You can clear it at any time in your browser settings.</p>
+
+      <h2>5. Who receives data</h2>
+      <p>I do not sell personal data. The following services take part in the processing:</p>
+      <ul>
+        <li><strong>Web3Forms</strong> delivers contact form messages to me and acts as my data processor. It is operated from India and uses Amazon Web Services, Cloudflare and Hetzner as infrastructure. For spam protection, the IP address and email address of people who submit a form may be sent to the services CleanTalk and Akismet. See the <a href="https://web3forms.com/privacy" target="_blank" rel="noopener">Web3Forms privacy policy</a>.</li>
+        <li><strong>Vercel Inc.</strong> hosts the website. See the <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">Vercel privacy policy</a>.</li>
+        <li><strong>GitHub</strong> (Microsoft) provides project information. See the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub privacy statement</a>.</li>
+        <li><strong>Google (Gmail)</strong> is my email provider and receives the messages sent to me. See the <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google privacy policy</a>.</li>
+      </ul>
+
+      <h2>6. Transfers outside the EEA</h2>
+      <p>Some of these providers are located in, or process data in, countries outside the EEA, such as the USA and India. According to the providers, such transfers rely on safeguards such as the EU–US Data Privacy Framework or the EU Standard Contractual Clauses. Please see each provider's privacy policy for details.</p>
+
+      <h2>7. Your rights</h2>
+      <p>Under the GDPR you have the right to:</p>
+      <ul>
+        <li>access the personal data I hold about you,</li>
+        <li>have incorrect data corrected,</li>
+        <li>have your data deleted,</li>
+        <li>restrict the processing of your data,</li>
+        <li>object to processing that is based on legitimate interest,</li>
+        <li>receive your data in a portable format, and</li>
+        <li>withdraw a consent you have given.</li>
+      </ul>
+      <p>Email me to use any of these rights. I will reply within one month. If you believe your data is handled incorrectly, you can complain to the Norwegian Data Protection Authority, <a href="https://www.datatilsynet.no/" target="_blank" rel="noopener">Datatilsynet</a>.</p>
+
+      <h2>8. Security</h2>
+      <p>The website is served over HTTPS and the contact form sends data over an encrypted connection. Access to messages I receive is limited to me. No system is completely secure, so I cannot guarantee absolute security.</p>
+
+      <h2>9. Content and liability</h2>
+      <p>The content of this website is provided in good faith to present my skills and projects, without any guarantee that it is complete, correct or up to date. Some projects are labelled <em>vibe-coded</em>, meaning they were mostly written by an AI. They are shown as they are, without warranty. Each project belongs to its own repository, so please check the repository for its licence terms. Names and logos of other companies and products belong to their respective owners. © 2026 Henning Trillhus.</p>
+
+      <h2>10. Changes</h2>
+      <p>I may update this policy, for example if I add new features. The date at the top shows when it last changed.</p>
+    </article>
+
+    <!-- ===================== NORSK ===================== -->
+    <article data-lang-block="no" lang="nb">
+      <a class="back-link" href="./">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+        Tilbake til porteføljen
+      </a>
+      <h1>Personvernerklæring</h1>
+      <p class="updated">Sist oppdatert: 30. september 2026</p>
+
+      <p>Denne nettsiden er min personlige portefølje. Jeg tar personvernet ditt på alvor og behandler så få personopplysninger som mulig. Her forklarer jeg hva som behandles, hvorfor, og hvilke rettigheter du har.</p>
+
+      <h2>1. Hvem er behandlingsansvarlig</h2>
+      <p>Behandlingsansvarlig er <strong>Henning Trillhus</strong> (privatperson, Norge). Du når meg på <a href="mailto:henningtrillhus05@gmail.com">henningtrillhus05@gmail.com</a>. Nettsiden er <strong>henningtrillhus.no</strong>.</p>
+
+      <h2>2. Kortversjonen</h2>
+      <ul>
+        <li>Ingen informasjonskapsler (cookies), ingen reklame, ingen analyse- eller sporingsverktøy og ingen profilering.</li>
+        <li>Skrifttyper, stiler og skript lastes fra denne nettsiden, ikke fra tredjeparter.</li>
+        <li>Personopplysninger behandles bare (a) hvis du sender meg en melding, og (b) i det begrensede omfanget som er beskrevet nedenfor når nettleseren din laster nettsiden og prosjektinformasjonen min.</li>
+      </ul>
+
+      <h2>3. Hva jeg behandler, og hvorfor</h2>
+
+      <h3>Kontaktskjemaet</h3>
+      <p><strong>Opplysninger:</strong> navnet, e-postadressen og meldingen du skriver, og at du har krysset av for samtykke. Skjematjenesten kan også behandle tekniske opplysninger som IP-adressen din for å levere meldingen og forhindre spam.</p>
+      <p><strong>Formål:</strong> å lese og svare på meldingen din, for eksempel om internship, jobb eller et prosjekt.</p>
+      <p><strong>Behandlingsgrunnlag:</strong> samtykket ditt (personvernforordningen artikkel 6 nr. 1 bokstav a), som du gir ved å krysse av og sende skjemaet. Du kan når som helst trekke samtykket tilbake ved å sende meg en e-post. Det påvirker ikke behandling som har skjedd før.</p>
+      <p><strong>Lagring:</strong> Jeg sletter meldinger senest 12 måneder etter siste kontakt, med mindre det trengs lengre, for eksempel i en pågående rekrutteringsprosess eller fordi loven krever det. Skjematjenesten Web3Forms lagrer en kopi av innsendinger i opptil tre år (eller kortere, avhengig av abonnementet). Hvis du ber om det, sletter jeg innsendingen din der også.</p>
+
+      <h3>E-post</h3>
+      <p>Hvis du sender meg e-post direkte, behandler jeg e-postadressen, navnet og meldingen din for å svare deg. Behandlingsgrunnlaget er min berettigede interesse i å svare på henvendelser (artikkel 6 nr. 1 bokstav f). Lagringstiden er den samme som for kontaktskjemaet.</p>
+
+      <h3>Besøk på nettsiden (drift)</h3>
+      <p>Nettsiden driftes av Vercel Inc. Som enhver vertstjeneste behandler Vercel tekniske opplysninger når du laster en side, som IP-adressen din, siden du ba om, nettleser- og enhetsinformasjon og tidspunkt. Dette trengs for å levere nettsiden sikkert og for å forhindre misbruk. Behandlingsgrunnlaget er min berettigede interesse i å drive en sikker nettside (artikkel 6 nr. 1 bokstav f). Jeg bruker ikke disse opplysningene til å identifisere enkeltbesøkende.</p>
+
+      <h3>Prosjektinformasjon fra GitHub</h3>
+      <p>Prosjektlisten, prosjektsidene og README-tekstene hentes direkte fra GitHub av nettleseren din. GitHub får dermed IP-adressen din og tekniske opplysninger, på samme måte som når du besøker github.com. Noen README-filer inneholder bilder som ligger på andre servere (for eksempel merker eller skjermbilder), og disse serverne får også IP-adressen din når bildet lastes. Behandlingsgrunnlaget er min berettigede interesse i å presentere arbeidet mitt (artikkel 6 nr. 1 bokstav f).</p>
+
+      <h3>Lenker til andre nettsider</h3>
+      <p>Lenker til GitHub, LinkedIn, live-demoer og andre sider tar deg bort fra denne nettsiden. Fra da gjelder deres egne personvernerklæringer, og jeg er ikke ansvarlig for dem.</p>
+
+      <h2>4. Lagring i nettleseren din</h2>
+      <p>Nettsiden lagrer noen få ting i nettleserens lokale lagring: valgt fargetema, valgt språk, en midlertidig kopi av prosjektdata fra GitHub (opptil én time) og README-sider du har åpnet (til du lukker fanen). Dette blir værende på enheten din og sendes ikke til meg. Det brukes bare for at nettsiden skal fungere slik du ba om, aldri til sporing. Fordi det bare er funksjonelt, bruker jeg ikke noe banner for informasjonskapsler. Du kan slette det når som helst i nettleserinnstillingene.</p>
+
+      <h2>5. Hvem mottar opplysninger</h2>
+      <p>Jeg selger ikke personopplysninger. Disse tjenestene er med i behandlingen:</p>
+      <ul>
+        <li><strong>Web3Forms</strong> leverer meldinger fra kontaktskjemaet til meg og er min databehandler. Tjenesten drives fra India og bruker Amazon Web Services, Cloudflare og Hetzner som infrastruktur. For spambeskyttelse kan IP-adressen og e-postadressen til de som sender inn et skjema bli sendt til tjenestene CleanTalk og Akismet. Se <a href="https://web3forms.com/privacy" target="_blank" rel="noopener">personvernerklæringen til Web3Forms</a>.</li>
+        <li><strong>Vercel Inc.</strong> driver nettsiden. Se <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">personvernerklæringen til Vercel</a>.</li>
+        <li><strong>GitHub</strong> (Microsoft) leverer prosjektinformasjon. Se <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">personvernerklæringen til GitHub</a>.</li>
+        <li><strong>Google (Gmail)</strong> er e-postleverandøren min og mottar meldingene som sendes til meg. Se <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">personvernerklæringen til Google</a>.</li>
+      </ul>
+
+      <h2>6. Overføring utenfor EØS</h2>
+      <p>Noen av disse leverandørene ligger i, eller behandler data i, land utenfor EØS, som USA og India. Ifølge leverandørene bygger slike overføringer på garantier som EU–USA Data Privacy Framework eller EUs standardkontraktsklausuler. Se hver leverandørs personvernerklæring for detaljer.</p>
+
+      <h2>7. Dine rettigheter</h2>
+      <p>Etter personvernforordningen har du rett til å:</p>
+      <ul>
+        <li>få innsyn i personopplysningene jeg har om deg,</li>
+        <li>få uriktige opplysninger rettet,</li>
+        <li>få opplysningene dine slettet,</li>
+        <li>begrense behandlingen av opplysningene dine,</li>
+        <li>protestere mot behandling som bygger på berettiget interesse,</li>
+        <li>få opplysningene dine utlevert i et bærbart format, og</li>
+        <li>trekke tilbake et samtykke du har gitt.</li>
+      </ul>
+      <p>Send meg en e-post for å bruke disse rettighetene. Jeg svarer innen én måned. Hvis du mener opplysningene dine behandles feil, kan du klage til Datatilsynet: <a href="https://www.datatilsynet.no/" target="_blank" rel="noopener">datatilsynet.no</a>.</p>
+
+      <h2>8. Sikkerhet</h2>
+      <p>Nettsiden leveres over HTTPS, og kontaktskjemaet sender data over en kryptert forbindelse. Tilgangen til meldinger jeg mottar er begrenset til meg. Ingen systemer er helt sikre, så jeg kan ikke love absolutt sikkerhet.</p>
+
+      <h2>9. Innhold og ansvar</h2>
+      <p>Innholdet på denne nettsiden er gitt i god tro for å presentere ferdighetene og prosjektene mine, uten garanti for at det er fullstendig, riktig eller oppdatert. Noen prosjekter er merket <em>vibekodet</em>, som betyr at de i hovedsak er skrevet av en KI. De vises slik de er, uten garanti. Hvert prosjekt hører til sitt eget repositorium, så se lisensvilkårene der. Navn og logoer tilhørende andre selskaper og produkter tilhører de respektive eierne. © 2026 Henning Trillhus.</p>
+
+      <h2>10. Endringer</h2>
+      <p>Jeg kan oppdatere denne erklæringen, for eksempel hvis jeg legger til nye funksjoner. Datoen øverst viser når den sist ble endret.</p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom" style="margin-top:0;border-top:0;padding-top:0">
+      <p>© <span id="year">2026</span> Henning Trillhus</p>
+      <p><a href="./">henningtrillhus.no</a></p>
+    </div>
+  </footer>
+
+  <script src="legal.js"></script>
+</body>
+</html>

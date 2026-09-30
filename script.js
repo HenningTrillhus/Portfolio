@@ -5,7 +5,7 @@
   const GITHUB_USER = "HenningTrillhus";
   // Public access key from web3forms.com (free; the key is meant to be public and only lets people email you).
   // While it is empty the contact form stays hidden.
-  const WEB3FORMS_ACCESS_KEY = "";
+  const WEB3FORMS_ACCESS_KEY = "ac9406cd-dd6a-4889-b7ca-eab4f9b43ee6";
   // Repos to leave out of the list (by name).
   const HIDDEN_REPOS = ["Portfolio"];
   // How each project was made. Repos in neither list end up under "More projects".
@@ -139,6 +139,8 @@
       formErr: "Something went wrong. Please try again, or email me directly.",
       formOr: "Or reach me directly",
       formNote: "Sent by email through Web3Forms.",
+      formConsent: "I agree that my name, email address and message are used to reply to me, and that they are handled as described in the <a href=\"privacy.html\" target=\"_blank\" rel=\"noopener\">privacy policy</a>.",
+      privacyLink: "Privacy policy",
       liveDemo: "Live demo ↗", code: "Code", project: "Project",
       descLang: "A {lang} project.", descGeneric: "A personal project.",
       skillsKicker: "03 / Skills", skillsTitle: "What I work with",
@@ -228,6 +230,8 @@
       formErr: "Noe gikk galt. Prøv igjen, eller send meg en e-post direkte.",
       formOr: "Eller ta kontakt direkte",
       formNote: "Sendes som e-post via Web3Forms.",
+      formConsent: "Jeg samtykker til at navn, e-postadresse og melding brukes til å svare meg, og at de behandles slik det står i <a href=\"privacy.html\" target=\"_blank\" rel=\"noopener\">personvernerklæringen</a>.",
+      privacyLink: "Personvernerklæring",
       liveDemo: "Live-demo ↗", code: "Kode", project: "Prosjekt",
       descLang: "Et {lang}-prosjekt.", descGeneric: "Et personlig prosjekt.",
       skillsKicker: "03 / Ferdigheter", skillsTitle: "Det jeg jobber med",

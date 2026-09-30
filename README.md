@@ -14,19 +14,24 @@ The site is available in **English and Norwegian**, follows your light/dark pref
 - **Project pages with README.** Clicking a project opens its README inside the site (`#/p/owner/repo`). Repositories without a README go straight to GitHub. README HTML is rebuilt from an allow-list before it is shown.
 - **Degree curriculum.** A semester-by-semester view of the programme, with links to the UiO course pages.
 - **Background.** Education, and a note on the break from development during military service.
+- **Contact form** powered by [Web3Forms](https://web3forms.com), with validation, a consent checkbox, a spam honeypot and sending/success/error states.
+- **Privacy policy** page in English and Norwegian, written for what the site actually does (no cookies, no analytics, no third-party fonts).
 - **Custom 404 page** that works both at the site root and under a subpath.
 - **Accessible and responsive.** Skip link, keyboard focus styles, reduced-motion support, phone-friendly layout and a print stylesheet.
 
 ## Tech
 
-Plain **HTML, CSS and JavaScript**. There is no build step, framework or package manager. The only external resource is Google Fonts (Inter and JetBrains Mono).
+Plain **HTML, CSS and JavaScript**. There is no build step, framework or package manager. Everything is served from the site itself (system fonts, no third-party scripts), so the browser only contacts the GitHub API to load projects, and Web3Forms when a message is sent.
 
 ```
 .
-├── index.html   # Page structure and default (English) text
-├── style.css    # Design tokens, layout, light/dark themes, print styles
-├── script.js    # Translations, GitHub data, timelines, README pages, routing
-├── 404.html     # Self-contained "page not found" page
+├── index.html    # Page structure and default (English) text
+├── style.css     # Design tokens, layout, light/dark themes, print styles
+├── script.js     # Translations, GitHub data, timelines, README pages, routing, contact form
+├── privacy.html  # Privacy policy (English and Norwegian)
+├── legal.js      # Language and theme switch for the privacy page
+├── 404.html      # Self-contained "page not found" page
+├── vercel.json   # Clean URLs and security headers for Vercel
 └── README.md
 ```
 
@@ -51,6 +56,7 @@ Most content lives at the top of `script.js`:
 | Nicer project descriptions (EN and NO) | `DESCRIPTIONS` |
 | Projects that aren't on this GitHub account | `OLDER_PROJECTS` |
 | Courses to mark as completed | `COMPLETED_COURSES` |
+| Contact form key (public, from web3forms.com) | `WEB3FORMS_ACCESS_KEY` |
 | All page text, in both languages | `I18N` |
 
 A repo that is in neither `HAND_CODED` nor `VIBE_CODED` is listed under *More projects*, so AI-written code is never labelled as hand-coded by accident.
@@ -71,6 +77,7 @@ It also works on GitHub Pages: the 404 page detects the `/<repo>/` subpath.
 
 - GitHub allows 60 unauthenticated API requests per hour per network. Project data is cached in the browser for an hour and README pages for the session, so normal browsing stays well within that. If the limit is hit, project pages show a link to GitHub instead.
 - README pages only open for repositories owned by `HenningTrillhus` or `HenningT05`.
+- The Web3Forms access key is meant to be public: it can only be used to email the address it was created for. If you change what data the site collects or which services it uses, update `privacy.html` too.
 
 ## Contact
 
