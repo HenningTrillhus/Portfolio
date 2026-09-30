@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>404 – Page not found · Henning Trillhus</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234f46e5'/%3E%3Cpath d='M20 16v32M44 16v32M20 32h24' stroke='white' stroke-width='6' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap">
+
+  <!-- Self-contained on purpose: GitHub Pages serves this file for any unknown path,
+       so relative links to style.css or script.js would break on nested URLs. -->
+  <style>
+    :root {
+      --bg: #fbfbfd; --surface: #fff; --border: #e3e3ea; --text: #15151a; --muted: #60606c;
+      --accent: #4f46e5; --accent-2: #0891b2; --accent-text: #fff; --glow: rgba(79, 70, 229, .16);
+      --code-bg: #14141b; --code-text: #d9d9e6;
+      --font: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+      --mono: "JetBrains Mono", "Cascadia Code", Consolas, "Courier New", monospace;
+      color-scheme: light;
+    }
+    :root[data-theme="dark"] {
+      --bg: #09090c; --surface: #111116; --border: #26262e; --text: #ededf2; --muted: #9b9ba8;
+      --accent: #8b8cf8; --accent-2: #22d3ee; --accent-text: #09090c; --glow: rgba(139, 140, 248, .18);
+      --code-bg: #0e0e13; color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 2rem 1.25rem;
+      background: radial-gradient(40rem 24rem at 50% 0%, var(--glow), transparent 70%), var(--bg);
+      color: var(--text); font: 400 1.0625rem/1.7 var(--font);
+    }
+    main { width: min(100%, 38rem); text-align: center; }
+    .code {
+      font: 800 clamp(5rem, 22vw, 9rem)/1 var(--font); letter-spacing: -.05em;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    h1 { margin: .5rem 0 .75rem; font-size: clamp(1.5rem, 4vw, 2rem); letter-spacing: -.02em; }
+    p { margin: 0; color: var(--muted); }
+    .term {
+      margin: 2rem auto; padding: 1rem 1.25rem; text-align: left; overflow-x: auto;
+      border: 1px solid var(--border); border-radius: 12px; background: var(--code-bg); color: var(--code-text);
+      font: 400 .9rem/1.8 var(--mono);
+    }
+    .term .prompt { color: #86efac; }
+    .term .err { color: #fca5a5; }
+    .term .path { word-break: break-all; }
+    .actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; }
+    .btn {
+      display: inline-block; padding: .7rem 1.25rem; border: 1px solid var(--border); border-radius: 10px;
+      background: var(--surface); color: var(--text); font: 600 .95rem/1.2 var(--font); text-decoration: none; cursor: pointer;
+    }
+    .btn:hover { border-color: var(--accent); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+  </style>
+
+  <script>
+    (function () {
+      var root = document.documentElement, theme = null, lang = null;
+      try { theme = localStorage.getItem("theme"); lang = localStorage.getItem("lang"); } catch (e) {}
+      if (theme !== "light" && theme !== "dark") theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      root.dataset.theme = theme;
+      if (lang !== "en" && lang !== "no") {
+        var pref = (navigator.languages && navigator.languages[0]) || navigator.language || "en";
+        lang = /^(nb|nn|no)\b/i.test(pref) ? "no" : "en";
+      }
+      root.lang = lang === "no" ? "nb" : "en";
+      root.dataset.lang = lang;
+    })();
+  </script>
+</head>
+<body>
+  <main>
+    <p class="code" aria-hidden="true">404</p>
+    <h1 id="title">Page not found</h1>
+    <p id="text">The page you're looking for doesn't exist, or it has moved.</p>
+
+    <pre class="term" aria-hidden="true"><span class="prompt">$</span> cd <span class="path" id="path">/this-page</span>
+<span class="err" id="err">cd: no such file or directory</span></pre>
+
+    <div class="actions">
+      <a class="btn primary" id="home" href="/">Back to the portfolio</a>
+      <a class="btn" id="projects" href="/#projects">See my projects</a>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var no = document.documentElement.dataset.lang === "no";
+      var text = no
+        ? { title: "Siden finnes ikke", text: "Siden du leter etter finnes ikke, eller den er flyttet.", err: "cd: ingen slik fil eller katalog", home: "Tilbake til porteføljen", projects: "Se prosjektene mine", doc: "404 – Siden finnes ikke · Henning Trillhus" }
+        : { title: "Page not found", text: "The page you're looking for doesn't exist, or it has moved.", err: "cd: no such file or directory", home: "Back to the portfolio", projects: "See my projects", doc: "404 – Page not found · Henning Trillhus" };
+      document.title = text.doc;
+      ["title", "text", "err", "home", "projects"].forEach(function (id) { document.getElementById(id).textContent = text[id]; });
+
+      // On GitHub Pages a project site lives under /<repo>/, anywhere else it lives at the root.
+      var base = "/";
+      if (/\.github\.io$/i.test(location.hostname)) {
+        var first = location.pathname.split("/")[1];
+        if (first) base = "/" + first + "/";
+      }
+      document.getElementById("home").href = base;
+      document.getElementById("projects").href = base + "#projects";
+
+      var shown = location.pathname.replace(base === "/" ? /^\/+/ : new RegExp("^" + base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), "") || "this-page";
+      document.getElementById("path").textContent = "/" + shown.replace(/^\/+/, "");
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Henning Trillhus – Computer Science Student &amp; Developer</title>
+  <meta name="description" content="Portfolio of Henning Trillhus, a computer science student at the University of Oslo who builds web apps and games.">
+  <meta name="author" content="Henning Trillhus">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Henning Trillhus – Computer Science Student &amp; Developer">
+  <meta property="og:description" content="Web apps, games and side projects by a computer science student at the University of Oslo.">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234f46e5'/%3E%3Cpath d='M20 16v32M44 16v32M20 32h24' stroke='white' stroke-width='6' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+    // Runs before first paint: pick theme + language and flag that JS is available.
+    (function () {
+      var root = document.documentElement;
+      root.classList.add("js");
+
+      var theme = null, lang = null;
+      try { theme = localStorage.getItem("theme"); lang = localStorage.getItem("lang"); } catch (e) {}
+
+      if (theme !== "light" && theme !== "dark") {
+        theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      root.dataset.theme = theme;
+
+      if (lang !== "en" && lang !== "no") {
+        var pref = (navigator.languages && navigator.languages[0]) || navigator.language || "en";
+        lang = /^(nb|nn|no)\b/i.test(pref) ? "no" : "en";
+      }
+      root.dataset.lang = lang;
+      root.lang = lang === "no" ? "nb" : "en";
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
+
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#top" data-i18n-attr="aria-label:brandLabel" aria-label="Henning Trillhus, back to top">
+        <span class="brand-mark" aria-hidden="true">H</span>
+        <span class="brand-name">Henning Trillhus</span>
+      </a>
+
+      <nav id="site-nav" class="site-nav" data-i18n-attr="aria-label:navLabel" aria-label="Main">
+        <a href="#about" data-i18n="navAbout">About</a>
+        <a href="#projects" data-i18n="navProjects">Projects</a>
+        <a href="#skills" data-i18n="navSkills">Skills</a>
+        <a href="#education" data-i18n="navEducation">Education</a>
+        <a href="#contact" data-i18n="navContact">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="lang-btn" id="lang-toggle" type="button" aria-label="Bytt til norsk">
+          <span data-l="en" lang="en">EN</span><span data-l="no" lang="nb">NO</span>
+        </button>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch colour theme">
+          <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <button class="icon-btn menu-btn" id="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="progress" id="progress" aria-hidden="true"></div>
+  </header>
+
+  <main id="main">
+    <div id="home">
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="badge reveal"><span class="pulse" aria-hidden="true"></span> <span data-i18n="badge">Open to internships &amp; part-time roles</span></p>
+          <h1 class="reveal"><span data-i18n="heroTitle1">Hi, I'm Henning.</span><br><span class="gradient-text" data-i18n="heroTitle2">I build web apps and games.</span></h1>
+          <!-- TODO: tweak this pitch so it sounds like you (English and Norwegian versions are in script.js) -->
+          <p class="lead reveal" data-i18n="heroLead">I'm studying Informatics: Programming and System Architecture at the University of Oslo. I've been programming since primary school and enjoy turning ideas into working software.</p>
+          <div class="cta reveal">
+            <a class="btn primary" href="#projects"><span data-i18n="ctaWork">View my work</span>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a class="btn" href="#contact" data-i18n="ctaContact">Get in touch</a>
+            <!-- TODO: put your CV in this folder as cv.pdf, then uncomment:
+            <a class="btn" href="cv.pdf" download data-i18n="ctaCv">Download CV</a> -->
+          </div>
+          <ul class="hero-links reveal" data-i18n-attr="aria-label:profiles" aria-label="Profiles">
+            <li><a href="https://github.com/HenningTrillhus" target="_blank" rel="noopener">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+              GitHub</a></li>
+            <li><a href="https://www.linkedin.com/in/henning-trillhus-253632396/" target="_blank" rel="noopener">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+              LinkedIn</a></li>
+            <li><a href="mailto:henningtrillhus05@gmail.com">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+              <span data-i18n="email">Email</span></a></li>
+          </ul>
+        </div>
+
+        <figure class="code-card reveal" data-i18n-attr="aria-label:codeLabel" aria-label="A short summary of Henning as code">
+          <div class="code-bar" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><em>henning.ts</em></div>
+<pre><code><span class="k">const</span> <span class="v">henning</span> <span class="p">=</span> <span class="p">{</span>
+  <span class="a">studies</span><span class="p">:</span> <span class="s">"Informatics (BSc)"</span><span class="p">,</span>
+  <span class="a">focus</span><span class="p">:</span> <span class="s">"Programming &amp; Architecture"</span><span class="p">,</span>
+  <span class="a">school</span><span class="p">:</span> <span class="s">"University of Oslo"</span><span class="p">,</span>
+  <span class="a">builds</span><span class="p">:</span> <span class="p">[</span><span class="s">"web apps"</span><span class="p">,</span> <span class="s">"games"</span><span class="p">],</span>
+  <span class="a">since</span><span class="p">:</span> <span class="s">"~2018"</span><span class="p">,</span>
+  <span class="a">location</span><span class="p">:</span> <span class="s">"Oslo, Norway"</span><span class="p">,</span>
+  <span class="a">openTo</span><span class="p">:</span> <span class="s">"internships"</span><span class="p">,</span>
+<span class="p">};</span></code></pre>
+        </figure>
+      </div>
+
+      <div class="container">
+        <dl class="stats reveal" id="stats" data-i18n-attr="aria-label:statsLabel" aria-label="GitHub at a glance">
+          <div><dt data-i18n="statProjects">Projects</dt><dd data-stat="projects">–</dd></div>
+          <div><dt data-i18n="statHand">Hand-coded</dt><dd data-stat="hand">–</dd></div>
+          <div><dt data-i18n="statLanguages">Languages</dt><dd data-stat="languages">–</dd></div>
+          <div><dt data-i18n="statDemos">Live demos</dt><dd data-stat="demos">–</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker" data-i18n="aboutKicker">01 / About</p>
+          <h2 data-i18n="aboutTitle">A bit about me</h2>
+        </header>
+        <div class="about-grid">
+          <div class="about-text reveal">
+            <!-- TODO: rewrite these in your own voice (English and Norwegian versions are in script.js) -->
+            <p data-i18n="about1">I started programming in primary school and moved on to HTML and JavaScript. Since then I've mostly taught myself, and today I build web apps and games with tools like Svelte, TypeScript, C# and Unity.</p>
+            <p data-i18n-html="about2">Today I'm taking a bachelor's degree in <strong>Informatics: Programming and System Architecture</strong> at the University of Oslo. The degree gives me the theory, and my own projects are where I put it into practice.</p>
+            <p data-i18n-html="about3">What I enjoy most is turning an idea into something people can actually use, like a recipe app, a study-group tool or a game. I'm looking for <strong>internships and part-time roles</strong> in software development where I can learn from experienced developers and contribute from day one.</p>
+          </div>
+          <ul class="facts reveal">
+            <li><span class="fact-label" data-i18n="factStudying">Studying</span><span data-i18n="factStudyingValue">Informatics: Programming and System Architecture</span></li>
+            <li><span class="fact-label" data-i18n="factDegree">Degree</span><span data-i18n="factDegreeValue">Bachelor, 3 years (180 ECTS)</span></li>
+            <li><span class="fact-label" data-i18n="factUniversity">University</span><span data-i18n="factUniversityValue">University of Oslo, Department of Informatics</span></li>
+            <li><span class="fact-label" data-i18n="factBased">Based in</span><span data-i18n="factBasedValue">Oslo, Norway</span></li>
+            <li><span class="fact-label" data-i18n="factLooking">Looking for</span><span data-i18n="factLookingValue">Internships &amp; part-time roles</span></li>
+            <li><span class="fact-label" data-i18n="factLanguages">Languages</span><span data-i18n="factLanguagesValue">Norwegian, English</span></li>
+          </ul>
+        </div>
+
+        <div class="journey-head reveal">
+          <h3 data-i18n="journeyTitle">How I got here</h3>
+          <p class="muted" data-i18n="journeySub">I've been making websites since I was little. Roughly how it went:</p>
+        </div>
+        <!-- TODO: adjust the years if you remember them more exactly (English and Norwegian text are in script.js) -->
+        <ol class="journey">
+          <li class="reveal">
+            <span class="j-when" data-i18n="j1When">~2018</span>
+            <span class="j-where" data-i18n="j1Where">7th grade, primary school</span>
+            <h4 data-i18n="j1Title">Scratch</h4>
+            <p data-i18n="j1Text">Started programming with Scratch, a block-based language. This is where my interest in development began.</p>
+          </li>
+          <li class="reveal">
+            <span class="j-when" data-i18n="j2When">~2020</span>
+            <span class="j-where" data-i18n="j2Where">Lower secondary school</span>
+            <h4 data-i18n="j2Title">HTML &amp; JavaScript</h4>
+            <p data-i18n="j2Text">Moved on to writing real code. In 2020 I built WorkoutLab (workoutlab.no), a fitness website, completely self-taught in HTML, CSS and JavaScript.</p>
+          </li>
+          <li class="reveal">
+            <span class="j-when" data-i18n="j3When">~2023</span>
+            <span class="j-where" data-i18n="j3Where">Going deeper</span>
+            <h4 data-i18n="j3Title">Python, Node.js, JavaScript &amp; Svelte</h4>
+            <p data-i18n="j3Text">Went deeper and built full projects, including the social platforms TheChatHive and MatchMetrix.</p>
+          </li>
+          <li class="reveal">
+            <span class="j-when" data-i18n="j4When">Now</span>
+            <span class="j-where" data-i18n="j4Where">University of Oslo</span>
+            <h4 data-i18n="j4Title">Informatics at UiO</h4>
+            <p data-i18n="j4Text">Studying programming and system architecture, and building with C#, Unity, TypeScript and AI-assisted tools.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" class="section">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker" data-i18n="projectsKicker">02 / Projects</p>
+          <h2 data-i18n="projectsTitle">Things I've built</h2>
+          <p class="muted" data-i18n-html="projectsSub">Everything I've built, with a clear split between what I coded myself and what I built with AI (vibe coding). Newest first, loaded live from my <a href="https://github.com/HenningTrillhus" target="_blank" rel="noopener">GitHub profile</a> plus older projects from my <a href="https://github.com/HenningT05" target="_blank" rel="noopener">earlier account</a>.</p>
+        </header>
+
+        <div id="project-timeline" aria-live="polite">
+          <p class="muted" data-i18n="loading">Loading projects…</p>
+        </div>
+        <noscript><p class="muted">Enable JavaScript to see my projects here / Slå på JavaScript for å se prosjektene mine her: <a href="https://github.com/HenningTrillhus">github.com/HenningTrillhus</a></p></noscript>
+      </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills" class="section">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker" data-i18n="skillsKicker">03 / Skills</p>
+          <h2 data-i18n="skillsTitle">What I work with</h2>
+        </header>
+        <!-- TODO: edit so it matches what you're comfortable with -->
+        <div class="skills">
+          <div class="skill-group reveal">
+            <h3 data-i18n="skillsLanguages">Languages</h3>
+            <ul class="chips"><li>Python</li><li>TypeScript</li><li>JavaScript</li><li>C#</li><li>HTML &amp; CSS</li></ul>
+          </div>
+          <div class="skill-group reveal">
+            <h3 data-i18n="skillsTools">Tools &amp; platforms</h3>
+            <ul class="chips"><li>Git &amp; GitHub</li><li>Unity</li><li>pygame</li><li>Vercel</li><li>VS Code</li></ul>
+          </div>
+          <div class="skill-group reveal">
+            <h3 data-i18n="skillsDegree">Covered in my degree</h3>
+            <ul class="chips">
+              <li data-i18n="topicOop">Object-oriented programming</li>
+              <li data-i18n="topicAlgo">Algorithms &amp; data structures</li>
+              <li data-i18n="topicDb">Databases &amp; data modelling</li>
+              <li data-i18n="topicSe">Software engineering</li>
+              <li data-i18n="topicSec">Information security</li>
+              <li data-i18n="topicOs">Operating systems &amp; networking</li>
+              <li data-i18n="topicLogic">Logic &amp; complexity</li>
+            </ul>
+          </div>
+          <div class="skill-group reveal">
+            <h3 data-i18n="skillsSpoken">Spoken languages</h3>
+            <ul class="chips"><li data-i18n="langNorwegian">Norwegian</li><li data-i18n="langEnglish">English</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EDUCATION -->
+    <section id="education" class="section">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker" data-i18n="eduKicker">04 / Education &amp; background</p>
+          <h2 data-i18n="eduTitle">Where I'm coming from</h2>
+        </header>
+        <ol class="timeline">
+          <li class="reveal">
+            <span class="when" data-i18n="eduWhen">In progress</span><!-- TODO: add years, e.g. 2025 – 2028 -->
+            <h3 data-i18n="eduDegree">BSc Informatics: Programming and System Architecture, University of Oslo</h3>
+            <p><span data-i18n="eduDetail">Department of Informatics (IFI). Learn to build effective, secure, high-quality programs and medium-sized data systems, and to work both independently and in teams.</span>
+              <a href="https://www.uio.no/studier/program/informatikk-programmering/" target="_blank" rel="noopener" data-i18n="eduLink">Programme page ↗</a></p>
+          </li>
+          <li class="reveal">
+            <span class="when" data-i18n="milWhen">2025 – 2026</span>
+            <h3 data-i18n="milTitle">A break from development: military service</h3>
+            <p data-i18n="milDetail">I served in the Norwegian Armed Forces Cyber Defence (Cyberforsvaret), which meant a pause in my development journey.</p>
+          </li>
+          <li class="reveal">
+            <span class="when" data-i18n="hsWhen">High school</span>
+            <h3 data-i18n="hsTitle">Vika videregående skole</h3>
+            <p data-i18n="hsDetail">Science track (realfag) with IT2, R2 and Physics 2.</p>
+          </li>
+          <!-- TODO: add jobs, internships, volunteering or hackathons, copy this block:
+          <li class="reveal">
+            <span class="when">2024</span>
+            <h3>Role, Company</h3>
+            <p>What you did and what you achieved.</p>
+          </li>
+          -->
+        </ol>
+
+        <div class="curriculum-head reveal">
+          <h3 data-i18n="curriculumTitle">The degree, semester by semester</h3>
+          <p class="muted" data-i18n="curriculumSub">What the programme covers, straight from the UiO study plan.</p>
+        </div>
+        <!-- Cards are generated in script.js (CURRICULUM). To mark courses you've finished, add their codes to COMPLETED_COURSES there. -->
+        <div class="curriculum" id="curriculum"></div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section">
+      <div class="container">
+        <div class="contact-card reveal">
+          <p class="kicker" data-i18n="contactKicker">05 / Contact</p>
+          <h2 data-i18n="contactTitle">Let's work together</h2>
+          <p class="lead" data-i18n="contactLead">I'm open to internships and part-time roles in software development. Email is the quickest way to reach me.</p>
+          <div class="cta">
+            <a class="btn primary" href="mailto:henningtrillhus05@gmail.com">henningtrillhus05@gmail.com</a>
+            <button class="btn" type="button" id="copy-email" data-email="henningtrillhus05@gmail.com" data-i18n="copyEmail">Copy email</button>
+            <a class="btn" href="https://www.linkedin.com/in/henning-trillhus-253632396/" target="_blank" rel="noopener">LinkedIn</a>
+            <a class="btn" href="https://github.com/HenningTrillhus" target="_blank" rel="noopener">GitHub</a>
+          </div>
+          <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <!-- PROJECT PAGE (README from GitHub), shown for #/p/owner/repo -->
+    <section id="project-view" class="section project-view" hidden>
+      <div class="container">
+        <a class="back-link" id="pv-back" href="#projects">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <span data-i18n="backToProjects">Back to projects</span>
+        </a>
+        <header class="pv-head" id="pv-head"></header>
+        <div class="readme" id="pv-readme" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <p class="footer-name">Henning Trillhus</p>
+        <p class="footer-tag" data-i18n="footerTag">Informatics student in Oslo, building web apps and games.</p>
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/HenningTrillhus" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/henning-trillhus-253632396/" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="mailto:henningtrillhus05@gmail.com" data-i18n="email">Email</a></li>
+      </ul>
+    </div>
+    <div class="container footer-bottom">
+      <p>© <span id="year">2026</span> Henning Trillhus</p>
+      <p><a href="https://github.com/HenningTrillhus/Portfolio" target="_blank" rel="noopener" data-i18n="footerSource">View source on GitHub</a></p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
